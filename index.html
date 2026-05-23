@@ -1,0 +1,2453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🃏 Conga Uruguaya - Local Pocket Edition v1.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:linear-gradient(135deg,#1a0533 0%,#0d1f4a 50%,#0a2e1f 100%);min-height:100vh;min-height:100dvh;font-family:'DM Sans',sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+.container{width:100%;max-width:480px;padding:0.75rem 0.75rem 1.5rem}
+.header{text-align:center;margin-bottom:1rem;position:relative;width:100%}
+.title{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;color:#fff;letter-spacing:-0.5px;text-shadow:0 2px 20px rgba(255,200,50,.25)}
+.subtitle{font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;letter-spacing:.3px}
+
+.timer-banner{background:rgba(0,0,0,0.4);border:2px solid #e24b4a;border-radius:12px;padding:8px 16px;display:inline-block;margin:10px auto 0;color:#fff;font-weight:bold;font-size:14px;box-shadow:0 0 15px rgba(226,75,74,0.2);transition:all 0.3s}
+.timer-banner.active{animation:pulse-timer 1.5s infinite;background:rgba(226,75,74,0.1)}
+.timer-clock{font-family:monospace;font-size:20px;color:#ff7070;margin-left:6px;vertical-align:middle}
+@keyframes pulse-timer{0%,100%{border-color:#e24b4a;box-shadow:0 0 15px rgba(226,75,74,0.2)}50%{border-color:#ff8080;box-shadow:0 0 25px rgba(226,75,74,0.5)}}
+
+.setup-screen{background:rgba(13,22,45,0.85);border:2px solid #224488;border-radius:24px;padding:2.5rem;max-width:500px;width:95%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);backdrop-filter:blur(10px);margin:4rem auto;color:#fff}
+.setup-screen h2{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:1.5rem;color:#f5b84a}
+.setup-list{display:flex;flex-direction:column;gap:14px;margin-bottom:2rem;text-align:left}
+.setup-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,0.08)}
+.setup-info{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;flex:1}
+
+.switch{position:relative;display:inline-block;width:46px;height:24px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background-color:#444;transition:.3s;border-radius:24px}
+.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:white;transition:.3s;border-radius:50%}
+input:checked + .slider{background-color:#1a5fa8}
+input:checked + .slider:before{transform:translateX(22px)}
+
+.btn-big{background:linear-gradient(135deg,#1a5fa8 0%,#0d2d5e 100%);color:#fff;border:1px solid #4fa3e8;border-radius:14px;padding:14px 28px;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 4px 15px rgba(26,95,168,0.4);transition:all 0.2s}
+.btn-big:hover{transform:scale(1.03);filter:brightness(1.1)}
+.btn-big:active{transform:scale(0.98)}
+
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.col{display:flex;flex-direction:column;gap:10px;position:relative}
+
+.p0{--c1:#4fa3e8;--c2:#1a5fa8;--c3:#0d2d5e;--cbg:#0d2240;--clight:#b5d4f4;--ctext:#e8f4ff}
+.p1{--c1:#e06fa0;--c2:#a33060;--c3:#5e0d2d;--cbg:#3d0d24;--clight:#f4c0d1;--ctext:#ffe8f2}
+.p2{--c1:#3fcaa0;--c2:#0f8a5a;--c3:#074a30;--cbg:#0a2e1e;--clight:#9fe1cb;--ctext:#e0fff4}
+.p3{--c1:#f5b84a;--c2:#b87010;--c3:#5e3500;--cbg:#301a00;--clight:#fad090;--ctext:#fff8e0}
+
+.card{background:var(--cbg);border:1.5px solid var(--c2);border-radius:12px;padding:10px 7px 9px;text-align:center;transition:border-color .2s,transform .15s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 60%);pointer-events:none}
+.card.danger{border-color:#e24b4a;border-width:2px;animation:pulse-danger 1.4s infinite}
+.card.eliminated{background:#1a0808;border-color:#791F1F}
+@keyframes pulse-danger{0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,.0)}50%{box-shadow:0 0 0 6px rgba(226,75,74,.18)}}
+
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;margin:0 auto 5px;border:2px solid var(--c1);background:var(--c3)}
+.pname{font-size:12px;font-weight:600;color:var(--ctext);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pscore{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;line-height:1;margin:3px 0 1px;color:var(--c1)}
+.plabel{font-size:9px;color:rgba(255,255,255,.4)}
+
+.bar-wrap{height:8px;background:rgba(255,255,255,.1);border-radius:99px;margin:10px 0 3px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.bar{height:100%;border-radius:99px;background:var(--c1);transition:width .45s cubic-bezier(.4,0,.2,1)}
+.bar-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.bar-pct,.bar-rem{font-size:10px;color:rgba(255,255,255,.45)}
+
+.status-badge{font-size:11px;padding:4px 10px;border-radius:99px;font-weight:600;margin-top:6px;display:inline-block;letter-spacing:.2px}
+.badge-win{background:#1a3d0a;color:#7ddd3a;border:1px solid #3a7a10}
+.badge-lose{background:#3d0a0a;color:#f07070;border:1px solid #7a1010}
+.badge-dead{background:#4a0000;color:#ff8080;border:1px solid #900;padding:5px 14px;font-size:12px}
+.badge-warn{background:#3d2200;color:#f5b84a;border:1px solid #7a4400}
+.badge-turn{background:rgba(79,163,232,0.15);color:#4fa3e8;border:1px solid #4fa3e8;animation:badge-turn-pulse 1.5s infinite}
+@keyframes badge-turn-pulse{0%,100%{box-shadow:0 0 0 0 rgba(79,163,232,0)}50%{box-shadow:0 0 0 4px rgba(79,163,232,0.2)}}
+
+.dice-status{background:rgba(0,0,0,.3);border-radius:10px;padding:8px;font-size:11px;color:#fff;text-align:left;margin-top:8px;border:1px solid rgba(255,255,255,.1);line-height:1.35}
+.dice-status .good{color:#7ddd3a;margin-bottom:3px}
+.dice-status .bad{color:#ff7070}
+.dice-status .safe{color:#4fa3e8;text-align:center;font-weight:bold}
+
+.corte-btn{width:100%;padding:12px 0;border-radius:12px;border:none;background:linear-gradient(135deg,#e24b4a 0%,#a32020 100%);color:#fff;font-weight:bold;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 12px rgba(226,75,74,0.3);transition:all 0.15s;opacity:0.4;pointer-events:none}
+.corte-btn.active{opacity:1;pointer-events:auto}
+.corte-btn.active:hover{transform:scale(1.03);filter:brightness(1.1)}
+.corte-btn.active:active{transform:scale(0.97)}
+
+.add-btn{width:100%;padding:14px 0;border-radius:14px;border:1.5px dashed var(--c2);background:rgba(255,255,255,.04);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.4;pointer-events:none}
+.add-btn.active{opacity:1;pointer-events:auto}
+.add-btn.active:hover{background:var(--c3);border-color:var(--c1);border-style:solid;transform:scale(1.02)}
+.col.eliminated .add-btn,.col.eliminated .corte-btn{opacity:.1 !important;pointer-events:none !important}
+.plus-icon{font-size:20px;color:var(--c1);line-height:1}
+.add-label{font-size:11px;color:rgba(255,255,255,.4)}
+
+.rounds{display:flex;flex-direction:column;gap:5px}
+.round-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 8px;font-size:11px;color:rgba(255,255,255,.6);display:flex;flex-direction:column;gap:3px;position:relative}
+.rc-top{display:flex;justify-content:space-between;align-items:center;width:100%}
+.rc-mods{font-size:9px;color:rgba(255,255,255,.35);line-height:1.2;border-top:1px solid rgba(255,255,255,0.05);padding-top:3px;margin-top:2px;white-space:normal;word-break:break-word}
+.rnum{font-size:10px;color:rgba(255,255,255,.3)}
+.del-btn{background:none;border:none;cursor:pointer;font-size:13px;color:rgba(255,255,255,.3);line-height:1;padding:0 2px;transition:color .1s;position:absolute;right:8px;top:6px}
+.del-btn:hover{color:#e24b4a}
+
+.elim-overlay{display:none;position:absolute;inset:0;background:rgba(10,0,0,.82);border-radius:16px;align-items:center;justify-content:center;z-index:10;flex-direction:column;gap:6px;backdrop-filter:blur(2px)}
+.elim-overlay.show{display:flex}
+
+.footer{margin-top:1rem;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;width:100%}
+.footer button{font-size:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 12px;cursor:pointer;color:rgba(255,255,255,.7);font-family:'DM Sans',sans-serif;transition:all .15s;font-weight:500;flex:1;min-width:0}
+.footer button:active{background:rgba(255,255,255,.14);color:#fff}
+.footer button.primary{background:#1a5fa8;border-color:#4fa3e8;color:#fff}
+.footer button.primary:active{background:#2272c7}
+.footer button.danger:active{background:rgba(226,75,74,.18);border-color:#e24b4a;color:#ff8080}
+
+.toast{background:rgba(30,20,50,.95);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:9px 18px;font-size:13px;color:#fff;margin:14px auto 0;max-width:260px;text-align:center;opacity:0;transition:opacity .25s;min-height:36px;font-weight:500;z-index:1000;position:relative}
+.toast.show{opacity:1}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:center;justify-content:center;overflow-y:auto;padding:10px}
+.overlay.open{display:flex}
+.modal{border-radius:20px;padding:1.25rem;width:440px;max-width:98vw;border:1.5px solid var(--c2);background:var(--cbg);position:relative;overflow:hidden;margin:auto}
+.modal h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--ctext);margin-bottom:.2rem}
+.modal .msub{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:0.75rem}
+
+.grid-selector{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;background:rgba(0,0,0,0.2);padding:8px;border-radius:12px}
+.suit-col{display:flex;flex-direction:column;gap:5px;align-items:center}
+.suit-header{font-size:18px;font-weight:bold;margin-bottom:2px}
+.card-token{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:6px;padding:6px 0;font-size:12px;font-weight:bold;cursor:pointer;transition:all 0.1s;text-align:center}
+.card-token:hover{background:var(--c2);border-color:var(--c1)}
+
+.selected-cards-area{background:rgba(0,0,0,0.3);border:1px dashed rgba(255,255,255,0.15);border-radius:10px;padding:8px;min-height:44px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.selected-chip{background:var(--c2);color:#fff;border:1px solid var(--c1);padding:4px 8px;border-radius:6px;font-size:12px;font-weight:bold;display:flex;align-items:center;gap:6px}
+.selected-chip span{cursor:pointer;color:rgba(255,255,255,0.6);font-size:10px}
+
+.hand-analysis-box{background:rgba(245,184,74,0.06);border:1px solid rgba(245,184,74,0.2);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#f5b84a;line-height:1.4}
+.hand-analysis-box strong{color:#fff;display:block;margin-bottom:2px;font-size:12px}
+
+.dice-modal{width:100%;max-width:95vw;background:#0d162d;border:2px solid #224488;border-radius:24px;padding:1.2rem;color:#fff}
+.dice-title{font-family:'Playfair Display',serif;font-size:20px;text-align:center;margin-bottom:1rem;color:#f5b84a}
+.dice-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:1.2rem}
+.dice-row{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,0.03);padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,0.06)}
+.dice-pinfo{display:flex;align-items:center;gap:6px;font-weight:600}
+.dice-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dice-btn{flex:1;padding:10px 8px;border-radius:8px;border:1px solid #3a7a10;background:#1a3d0a;color:#7ddd3a;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;touch-action:manipulation}
+.dice-btn.active-safe{border-color:#1a5fa8;background:#0d2d5e;color:#b5d4f4}
+.dice-result-box{width:100%;font-size:11px;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,0.4);border:1px dashed rgba(255,255,255,0.15);min-height:34px;display:flex;flex-direction:column;justify-content:center}
+
+.history-section{margin-top:2.5rem;background:rgba(13,22,45,0.6);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1rem;width:100%;backdrop-filter:blur(5px)}
+.history-section h3{font-family:'Playfair Display',serif;color:#f5b84a;font-size:18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.history-table-wrapper{overflow-x:auto;width:100%}
+.history-table{width:100%;border-collapse:collapse;text-align:center;font-size:13px;color:#fff}
+.history-table th{background:rgba(26,95,168,0.2);padding:10px;border:1px solid rgba(255,255,255,0.1);font-weight:600}
+.history-table td{padding:10px;border:1px solid rgba(255,255,255,0.05)}
+.history-table tr:nth-child(even){background:rgba(255,255,255,0.02)}
+
+.win-screen{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.win-screen.show{display:flex}
+.win-box{background:linear-gradient(135deg,#1a3010,#0a2010);border:2px solid #3a7a10;border-radius:24px;padding:2.5rem 2rem;text-align:center;max-width:320px;width:90%}
+.win-emoji{font-size:64px;display:block;margin-bottom:.5rem}
+.win-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#7ddd3a}
+
+@keyframes dice-shake{0%{transform:translate(2px,1px) rotate(0deg)}100%{transform:translate(-1px,-2px) rotate(-1deg)}}
+.shaking{animation:dice-shake 0.1s infinite}
+
+/* ============================================================
+   PLAY AREA - SISTEMA DE JUEGO DE CARTAS INTERACTIVO
+   ============================================================ */
+
+/* Área de juego principal */
+#play-area{width:100%;display:none}
+
+/* Encabezado del turno */
+.turn-header{background:rgba(0,0,0,0.4);border:1.5px solid var(--c1);border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.turn-player-info{display:flex;align-items:center;gap:8px}
+.turn-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--c1);background:var(--c3);flex-shrink:0}
+.turn-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ctext)}
+.turn-score-sub{font-size:10px;color:rgba(255,255,255,.45)}
+.turn-phase-tag{font-size:10px;padding:4px 8px;border-radius:99px;font-weight:600;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.1);white-space:nowrap;flex-shrink:0}
+.turn-phase-tag.phase-draw{background:rgba(79,163,232,0.15);color:#4fa3e8;border-color:#1a5fa8}
+.turn-phase-tag.phase-play{background:rgba(63,202,160,0.15);color:#3fcaa0;border-color:#0f8a5a}
+.turn-phase-tag.phase-discard{background:rgba(245,184,74,0.15);color:#f5b84a;border-color:#b87010}
+
+/* Mazo y Pozo — row compacta */
+.deck-area{display:flex;gap:12px;justify-content:center;margin-bottom:12px}
+.deck-pile{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.deck-pile-label{font-size:10px;color:rgba(255,255,255,0.5);font-weight:600;letter-spacing:0.5px;text-transform:uppercase}
+.deck-card-visual{width:62px;height:86px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid rgba(255,255,255,0.15);position:relative;transition:all 0.2s;user-select:none;touch-action:manipulation}
+.deck-card-visual.deck-back{background:linear-gradient(135deg,#1a2a5e,#0d1a3a);border-color:rgba(79,163,232,0.3)}
+.deck-card-visual.deck-back::after{content:'🃏';font-size:22px}
+.deck-card-visual.deck-empty{background:rgba(255,255,255,0.03);border-style:dashed;border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.2);font-size:11px}
+.deck-card-visual.clickable:active{transform:scale(0.95)}
+.deck-card-visual.highlight-draw{border-color:#4fa3e8;box-shadow:0 0 14px rgba(79,163,232,0.5);animation:glow-draw 1.2s infinite}
+@keyframes glow-draw{0%,100%{box-shadow:0 0 8px rgba(79,163,232,0.4)}50%{box-shadow:0 0 20px rgba(79,163,232,0.8)}}
+.deck-count{font-size:10px;color:rgba(255,255,255,0.35)}
+
+/* Carta del pozo visible */
+.pile-card-inner{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;padding:4px}
+.pile-card-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;line-height:1}
+.pile-card-suit{font-size:12px;line-height:1}
+
+/* Panel de análisis en vivo — colapsable */
+.live-analysis-panel{background:rgba(245,184,74,0.05);border:1px solid rgba(245,184,74,0.15);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#f5b84a;line-height:1.5}
+.live-analysis-panel .la-title{font-size:11px;font-weight:bold;color:#fff;margin-bottom:3px;display:flex;justify-content:space-between;align-items:center}
+.cut-points{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#f5b84a}
+.cut-points.can-cut{color:#7ddd3a}
+
+/* Mano del jugador */
+.hand-area{margin-bottom:10px}
+.hand-label{font-size:10px;color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+
+/* ── HAND GRID: scroll horizontal en una línea ── */
+.hand-grid{
+  display:flex;
+  flex-direction:row;
+  gap:0;
+  overflow-x:auto;
+  overflow-y:visible;
+  padding:14px 8px 8px;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  /* espacio negativo para que las cartas levantadas no queden cortadas */
+  margin:0 -4px;
+}
+.hand-grid::-webkit-scrollbar{display:none}
+
+/* Token de carta en mano */
+/* ── NAIPE ESPAÑOL CLÁSICO ── */
+.hand-card{
+  width:58px;height:82px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:stretch;
+  cursor:pointer;
+  user-select:none;
+  position:relative;
+  background:linear-gradient(160deg,#fdf6e3 0%,#f5e9c8 100%);
+  border:1.5px solid #c9a96e;
+  box-shadow:0 3px 8px rgba(0,0,0,0.4);
+  overflow:hidden;
+  flex-shrink:0;
+  /* solapamiento de cartas */
+  margin-right:-18px;
+  transition:transform 0.15s, box-shadow 0.15s, margin-right 0.15s;
+  touch-action:none; /* necesario para drag en mobile */
+  -webkit-touch-callout:none;
+}
+/* Última carta sin margen negativo */
+.hand-card:last-child{margin-right:0}
+/* Marco interior decorativo */
+.hand-card::before{
+  content:'';position:absolute;inset:3px;border-radius:5px;
+  border:1px solid rgba(160,110,50,0.25);pointer-events:none;
+}
+.hand-card .hc-corner{
+  position:absolute;display:flex;flex-direction:column;align-items:center;
+  line-height:1;
+}
+.hand-card .hc-corner.top-left{top:3px;left:3px;}
+.hand-card .hc-corner.bot-right{bottom:3px;right:3px;transform:rotate(180deg);}
+.hand-card .hc-corner .hc-num{
+  font-family:'Playfair Display',serif;font-size:12px;font-weight:900;line-height:1;
+}
+.hand-card .hc-corner .hc-suit{font-size:8px;line-height:1;}
+.hand-card .hc-center{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+}
+.hand-card .hc-center .hc-suit-big{font-size:22px;line-height:1;}
+/* Colores por palo en naipe español */
+.suit-basto .hc-num,.suit-basto .hc-suit-big{color:#2a7a3b}
+.suit-espada .hc-num,.suit-espada .hc-suit-big{color:#1a3a6e}
+.suit-oro .hc-num,.suit-oro .hc-suit-big{color:#8a5c00}
+.suit-copa .hc-num,.suit-copa .hc-suit-big{color:#8a1a1a}
+.suit-basto .hc-suit{color:#2a7a3b}
+.suit-espada .hc-suit{color:#1a3a6e}
+.suit-oro .hc-suit{color:#8a5c00}
+.suit-copa .hc-suit{color:#8a1a1a}
+.hand-card.combo-stair{border-color:#3fcaa0;box-shadow:0 2px 10px rgba(63,202,160,0.5) !important}
+.hand-card.combo-leg{border-color:#d4a017;box-shadow:0 2px 10px rgba(245,184,74,0.5) !important}
+.hand-card.selected-discard{border-color:#e24b4a;box-shadow:0 10px 22px rgba(226,75,74,0.6) !important;transform:translateY(-14px);z-index:50;margin-right:4px}
+.hand-card.dragging{
+  opacity:0.3;
+  transform:scale(0.95);
+}
+.hand-card.drag-over{
+  margin-right:44px; /* abre hueco donde va a caer la carta */
+}
+.combo-badge{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:bold;padding:1px 5px;border-radius:99px;white-space:nowrap;z-index:2}
+.combo-stair .combo-badge{background:#3fcaa0;color:#000}
+.combo-leg .combo-badge{background:#f5b84a;color:#000}
+
+/* Botones de acción del turno */
+.action-row{display:flex;gap:8px;margin-top:8px}
+.action-btn{flex:1;padding:15px 8px;border-radius:13px;border:none;font-weight:bold;font-size:14px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px;touch-action:manipulation}
+.action-btn:active{transform:scale(0.96)}
+.btn-discard{background:linear-gradient(135deg,#b87010,#5e3500);color:#fff8e0;border:1px solid #f5b84a;opacity:0.4;pointer-events:none}
+.btn-discard.ready{opacity:1;pointer-events:auto;box-shadow:0 4px 14px rgba(245,184,74,0.3)}
+.btn-cut{background:linear-gradient(135deg,#e24b4a,#a32020);color:#fff;border:1px solid #ff7070;opacity:0.35;pointer-events:none}
+.btn-cut.ready{opacity:1;pointer-events:auto;box-shadow:0 4px 14px rgba(226,75,74,0.35);animation:cut-pulse 1.8s infinite}
+@keyframes cut-pulse{0%,100%{box-shadow:0 4px 14px rgba(226,75,74,0.35)}50%{box-shadow:0 4px 22px rgba(226,75,74,0.7)}}
+
+/* PANTALLA DE TRANSICIÓN PASS & PLAY */
+#passplay-curtain{display:none;position:fixed;inset:0;background:#050510;z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;overflow:hidden}
+#passplay-curtain.show{display:flex}
+#passplay-curtain::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(26,95,168,0.18) 0%,transparent 70%);pointer-events:none}
+#passplay-curtain::after{content:'🔒';position:absolute;font-size:200px;opacity:0.04;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;user-select:none}
+.pp-lock-ring{width:100px;height:100px;border-radius:50%;border:3px solid rgba(79,163,232,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;position:relative;animation:pp-ring-pulse 2s ease-in-out infinite;box-shadow:0 0 0 0 rgba(79,163,232,0.2)}
+@keyframes pp-ring-pulse{0%,100%{box-shadow:0 0 0 0 rgba(79,163,232,0.2),0 0 20px rgba(79,163,232,0.1)}50%{box-shadow:0 0 0 12px rgba(79,163,232,0.0),0 0 40px rgba(79,163,232,0.2)}}
+.pp-icon{font-size:52px;line-height:1;display:block}
+.pp-title{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;color:#fff;margin-bottom:.4rem;letter-spacing:-0.5px}
+.pp-divider{width:60px;height:2px;background:linear-gradient(90deg,transparent,#4fa3e8,transparent);margin:.8rem auto 1rem;border-radius:99px}
+.pp-sub{font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:.5rem;line-height:1.6;max-width:300px}
+.pp-player-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(245,184,74,0.12);border:1.5px solid rgba(245,184,74,0.35);border-radius:99px;padding:8px 20px;margin:0 auto 2rem;font-size:18px;font-weight:bold;color:#f5b84a;font-family:'Playfair Display',serif}
+.pp-next-name{color:#f5b84a;font-weight:bold}
+.pp-warning{font-size:11px;color:rgba(255,100,100,0.7);background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.15);border-radius:8px;padding:6px 14px;margin-bottom:1.5rem;max-width:300px;letter-spacing:0.2px}
+.pp-reveal-btn{background:linear-gradient(135deg,#1a5fa8,#0d2d5e);color:#fff;border:2px solid #4fa3e8;border-radius:18px;padding:18px 36px;font-size:17px;font-weight:bold;cursor:pointer;box-shadow:0 6px 24px rgba(26,95,168,0.4);transition:all 0.2s;font-family:'DM Sans',sans-serif;width:100%;max-width:320px;position:relative;overflow:hidden}
+.pp-reveal-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08),transparent);border-radius:18px}
+.pp-reveal-btn:hover{transform:scale(1.03);filter:brightness(1.1);box-shadow:0 8px 32px rgba(26,95,168,0.6)}
+.pp-reveal-btn:active{transform:scale(0.97)}
+.pp-reveal-btn.locked{opacity:0.45;pointer-events:none;cursor:not-allowed}
+.pp-countdown{font-size:12px;color:rgba(255,255,255,0.35);margin-top:10px;height:18px;transition:opacity 0.3s}
+.pp-countdown b{color:#4fa3e8}
+
+/* PANTALLA DE REVELACIÓN DE MAZOS AL CORTE */
+#cut-reveal-screen{display:none;position:fixed;inset:0;background:linear-gradient(160deg,#0a0118,#08142e,#020e08);z-index:290;flex-direction:column;align-items:center;overflow-y:auto;padding:1.5rem 1rem 3rem}
+#cut-reveal-screen.show{display:flex}
+.cut-reveal-header{text-align:center;margin-bottom:1.5rem;width:100%}
+.cut-reveal-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:#f5b84a;margin-bottom:.3rem}
+.cut-reveal-sub{font-size:13px;color:rgba(255,255,255,0.5)}
+.cut-reveal-grid{display:flex;flex-direction:column;gap:14px;width:100%;max-width:520px}
+.cut-reveal-player{border-radius:16px;padding:14px;border:1.5px solid}
+.cut-reveal-player-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cut-reveal-player-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+.cut-reveal-cards{display:flex;flex-wrap:wrap;gap:6px}
+/* Mini carta española para la revelación */
+.mini-card{width:42px;height:58px;border-radius:6px;background:linear-gradient(160deg,#fdf6e3,#f5e9c8);border:1.5px solid #c9a96e;box-shadow:0 2px 5px rgba(0,0,0,0.4);position:relative;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;flex-shrink:0}
+.mini-card.cut-card{transform:rotate(90deg);border-color:#e24b4a;box-shadow:0 2px 10px rgba(226,75,74,0.5)}
+.mini-card .mc-corner{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:1}
+.mini-card .mc-corner.tl{top:2px;left:3px}
+.mini-card .mc-corner.br{bottom:2px;right:3px;transform:rotate(180deg)}
+.mini-card .mc-corner .mc-num{font-family:'Playfair Display',serif;font-size:10px;font-weight:900;line-height:1}
+.mini-card .mc-corner .mc-suit{font-size:7px}
+.mini-card .mc-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px}
+.mini-card.mc-basto .mc-num,.mini-card.mc-basto .mc-center{color:#2a7a3b}
+.mini-card.mc-espada .mc-num,.mini-card.mc-espada .mc-center{color:#1a3a6e}
+.mini-card.mc-oro .mc-num,.mini-card.mc-oro .mc-center{color:#8a5c00}
+.mini-card.mc-copa .mc-num,.mini-card.mc-copa .mc-center{color:#8a1a1a}
+.mini-card-hung{box-shadow:0 0 0 2px rgba(226,75,74,0.7)}
+.mini-card-combo{box-shadow:0 0 0 2px rgba(63,202,160,0.7)}
+.cut-reveal-continue-btn{margin-top:1.8rem;background:linear-gradient(135deg,#1a5fa8,#0d2d5e);color:#fff;border:2px solid #4fa3e8;border-radius:18px;padding:16px 32px;font-size:17px;font-weight:bold;cursor:pointer;box-shadow:0 6px 24px rgba(26,95,168,0.5);transition:all 0.2s;font-family:'DM Sans',sans-serif;width:100%;max-width:380px}
+.cut-reveal-continue-btn:hover{transform:scale(1.02);filter:brightness(1.1)}
+
+/* MODAL DE CORTE FINAL */
+.cut-confirm-modal{width:500px;max-width:96vw;background:#0d162d;border:2px solid #224488;border-radius:24px;padding:1.5rem;color:#fff;max-height:90vh;overflow-y:auto}
+.cut-confirm-modal h2{font-family:'Playfair Display',serif;font-size:22px;color:#f5b84a;text-align:center;margin-bottom:1.2rem}
+.cut-player-row{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;margin-bottom:10px}
+.cut-player-row .cpr-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cut-player-row .cpr-name{font-weight:bold;font-size:14px}
+.cut-player-row .cpr-role{font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600}
+.role-cutter{background:#1a3d0a;color:#7ddd3a;border:1px solid #3a7a10}
+.role-normal{background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1)}
+.cpr-hand-preview{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.cpr-hand-card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:3px 7px;font-size:12px;font-weight:bold;color:#fff}
+.cpr-hand-card.cpr-combo{background:rgba(63,202,160,0.15);border-color:#3fcaa0}
+.cpr-hand-card.cpr-hung{background:rgba(226,75,74,0.12);border-color:rgba(226,75,74,0.3)}
+
+/* Pantallas más grandes: ampliar un poco */
+@media(min-width:480px){
+  .container{padding:1rem 1rem 2rem}
+  .hand-card{width:62px;height:88px}
+  .deck-card-visual{width:68px;height:94px}
+}
+</style>
+</head>
+<body>
+<div class="container" id="app-container">
+
+  <div class="setup-screen" id="welcome-screen">
+    <div class="title" style="margin-bottom:10px;">🃏 Conga Uruguaya</div>
+    <div class="subtitle" style="margin-bottom:2.5rem;">Local Pocket Edition v1.0</div>
+    <button class="btn-big" onclick="goToPlayerSelection()">🚀 INICIAR PARTIDA</button>
+  </div>
+
+  <div class="setup-screen" id="player-select-screen" style="display:none;">
+    <h2>👥 ¿Quiénes van a jugar hoy?</h2>
+    <p style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:1.5rem;">Seleccioná los jugadores y la modalidad.</p>
+    <div class="setup-list" id="setup-players-list"></div>
+    <div class="setup-row" style="margin-bottom:1rem;background:rgba(245,184,74,0.06);border-color:rgba(245,184,74,0.25);">
+      <div class="setup-info"><span>🎲</span><span>Modo de Juego con Dados</span></div>
+      <label class="switch"><input type="checkbox" id="chk-dice-mode" checked><span class="slider"></span></label>
+    </div>
+    <div class="setup-row" style="margin-bottom:2rem;background:rgba(63,202,160,0.06);border-color:rgba(63,202,160,0.25);">
+      <div class="setup-info"><span>🃏</span><span>Modo Interactivo (Pass &amp; Play)</span></div>
+      <label class="switch"><input type="checkbox" id="chk-interactive" checked><span class="slider"></span></label>
+    </div>
+    <button class="btn-big" onclick="confirmInitialSetup()">Siguiente: Comenzar Partida ➡️</button>
+  </div>
+
+  <div id="main-game-layout" style="display:none;width:100%;">
+    <div class="header">
+      <div class="title">🃏 Conga Uruguaya</div>
+      <div class="subtitle" id="game-subtitle">🃏 Local Pocket Edition v1.0</div>
+      <div class="timer-banner" id="timer-banner" style="display:none;">
+        ⚔️ RONDA EN CURSO <span class="timer-clock" id="timer-clock">00:00</span>
+      </div>
+    </div>
+
+    <!-- ÁREA DE JUEGO INTERACTIVO -->
+    <div id="play-area">
+      <!-- Encabezado del turno actual -->
+      <div class="turn-header p0" id="turn-header">
+        <div class="turn-player-info">
+          <div class="turn-avatar" id="turn-avatar">🎴</div>
+          <div>
+            <div class="turn-name" id="turn-name">Jugador</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="turn-score-label">0 pts acumulados</div>
+          </div>
+        </div>
+        <div class="turn-phase-tag phase-draw" id="turn-phase-tag">⬆️ Fase: Robá una carta</div>
+      </div>
+
+      <!-- Mazo y Pozo -->
+      <div class="deck-area">
+        <div class="deck-pile" id="pile-mazo" onclick="drawFromDeck()">
+          <div class="deck-card-visual deck-back clickable highlight-draw" id="deck-visual"></div>
+          <div class="deck-pile-label">Mazo</div>
+          <div class="deck-count" id="deck-count-label">48 cartas</div>
+        </div>
+        <div class="deck-pile" id="pile-pozo" onclick="drawFromPile()">
+          <div class="deck-card-visual clickable highlight-draw" id="pozo-visual" style="background:rgba(255,255,255,0.03);border-style:dashed;border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);font-size:12px;"></div>
+          <div class="deck-pile-label">Pozo</div>
+          <div class="deck-count" id="pozo-label">vacío</div>
+        </div>
+      </div>
+
+      <!-- Análisis en Vivo -->
+      <div class="live-analysis-panel" id="live-analysis-panel">
+        <div class="la-title">
+          <span>🔍 Análisis de tu mano</span>
+          <span>Puntos si cortás: <span class="cut-points" id="cut-points-display">-</span></span>
+        </div>
+        <div id="live-analysis-text">Robá una carta para comenzar.</div>
+      </div>
+
+      <!-- Mano del jugador -->
+      <div class="hand-area">
+        <div class="hand-label">
+          <span>🤚 Tu mano <span style="font-size:9px;color:rgba(255,255,255,0.3);font-weight:400">· mantenés para ordenar</span></span>
+          <span id="hand-count-label" style="color:#f5b84a">0 cartas</span>
+        </div>
+        <div class="hand-grid" id="hand-grid"></div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="action-row">
+        <button class="action-btn btn-discard" id="btn-discard" onclick="discardSelectedCard()">🗑️ Tirar al Pozo</button>
+        <button class="action-btn btn-cut" id="btn-cut" onclick="triggerCut()">💥 ¡CORTO!</button>
+      </div>
+    </div>
+
+    <!-- Vista del panel de puntajes (cuando no hay juego interactivo activo o entre rondas) -->
+    <div id="scores-panel">
+      <div class="grid" id="grid"></div>
+      <div class="history-section" id="global-history-section" style="display:none;">
+        <h3>📊 Tabla de Posiciones y Control de Rondas</h3>
+        <div class="history-table-wrapper">
+          <table class="history-table" id="history-table-element"></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="primary" id="main-dice-btn" onclick="openDiceModal()">🎲 Configurar Dados Próxima Ronda</button>
+      <button onclick="undoLast()">↩️ Deshacer</button>
+      <button class="danger" onclick="resetToWelcome()">🔄 Volver al Inicio</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-inner"></div>
+</div>
+
+<div class="overlay" id="dice-overlay">
+  <div class="modal dice-modal">
+    <div class="dice-title">🎲 Configuración de Dados de Ronda</div>
+    <div class="dice-grid" id="dice-grid-content"></div>
+    <div class="mbtns">
+      <button class="btn-big" style="width:100%;" onclick="confirmDiceRonda()">⚔️ Iniciar Ronda y Repartir Cartas</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cortina Pass & Play -->
+<div id="passplay-curtain">
+  <div class="pp-lock-ring">
+    <div class="pp-icon">🙈</div>
+  </div>
+  <div class="pp-title" id="pp-curtain-title">Turno terminado</div>
+  <div class="pp-divider"></div>
+  <div class="pp-sub" id="pp-curtain-sub">Pasá el celular a</div>
+  <div class="pp-player-chip"><span id="pp-next-emoji">🎴</span><span id="pp-next-name">Jugador</span></div>
+  <div class="pp-warning">⚠️ No mires la pantalla. Esperá a que el jugador correcto tenga el celular.</div>
+  <button class="pp-reveal-btn locked" id="pp-reveal-btn" onclick="revealNextTurn()">🃏 Soy <span id="pp-btn-name">Jugador</span> — Revelar mis cartas</button>
+  <div class="pp-countdown" id="pp-countdown"></div>
+</div>
+
+<!-- Pantalla de revelación de mazos al cortar -->
+<div id="cut-reveal-screen">
+  <div class="cut-reveal-header">
+    <div class="cut-reveal-title" id="cut-reveal-title">💥 ¡Ronda terminada!</div>
+    <div class="cut-reveal-sub" id="cut-reveal-sub">Acá están los mazos de todos los jugadores</div>
+  </div>
+  <div class="cut-reveal-grid" id="cut-reveal-grid"></div>
+  <button class="cut-reveal-continue-btn" onclick="openCutConfirmModal()">✅ Ver puntajes de la ronda</button>
+</div>
+
+<div class="overlay" id="cut-overlay">
+  <div class="cut-confirm-modal" id="cut-confirm-inner">
+    <h2>💥 ¡Ronda Cortada!</h2>
+    <div id="cut-players-list"></div>
+    <button class="btn-big" style="width:100%;margin-top:10px;" onclick="confirmCutRound()">✅ Confirmar Puntos Finales</button>
+  </div>
+</div>
+
+<div class="win-screen" id="win-screen">
+  <div class="win-box">
+    <span class="win-emoji">🏆</span>
+    <div class="win-title" id="win-name"></div>
+    <p style="color:rgba(255,255,255,0.7);margin:10px 0 20px;" id="win-sub"></p>
+    <button class="btn-big" onclick="resetToWelcome()">🎲 Volver al Menú</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTES Y DATOS DE DADOS
+// ============================================================
+const LIMIT = 100;
+const PALOS = {
+  'basto':{name:'Basto',emoji:'🌿'},
+  'espada':{name:'Espada',emoji:'⚔️'},
+  'oro':{name:'Oro',emoji:'🪙'},
+  'copa':{name:'Copa',emoji:'🏆'}
+};
+const PALO_COLORS = {'basto':'#3fcaa0','espada':'#4fa3e8','oro':'#f5b84a','copa':'#e06fa0'};
+
+let players=[
+  {name:'Dino',init:'⚽',idx:0,activePlayer:true},
+  {name:'Lupi',init:'🌙',idx:1,activePlayer:true},
+  {name:'Mela',init:'🍀',idx:2,activePlayer:true},
+  {name:'Momi',init:'⭐',idx:3,activePlayer:true},
+];
+
+let useDiceMode = true;
+let useInteractiveMode = true;
+
+const G_DICE = [
+  {id:'g1',text:'🟢 El Borrón: -20 pts netos al final.'},
+  {id:'g2',text:'🟢 Corte Alto: Habilita cortar con ≤ 7.'},
+  {id:'g3',text:'🟢 Inmunidad Pesada: Tus 10, 11 y 12 valen 0 pts.'},
+  {id:'g4',text:'🟢 Anestésico: Sumás solo la mitad de tus puntos si corta otro.'},
+  {id:'g5',text:'🟢 Corte Limpio: Si hacés 0 pts, penalizás a todos con +15.'},
+  {id:'g6',text:'🟢 Escudo de Oro: Tus cartas de Oro colgadas valen 0 pts.'},
+  {id:'g7',text:'🟢 Refugio de Copas: Tus cartas de Copa colgadas valen la mitad.'},
+  {id:'g8',text:'🟢 Inmunidad Impar: Todas tus cartas impares colgadas valen 0 pts.'},
+  {id:'g9',text:'🟢 Descarte de Reyes: Los 12 colgados te valen 0 pts.'},
+  {id:'g10',text:'🟢 Escalera Protectora: Bonificación de -10 pts directos.'},
+  {id:'g11',text:'🟢 Viento a Favor: Si cortás vos, ganás un bono de -15 pts.'},
+  {id:'g12',text:'🟢 Comodín Oculto: Tu carta colgada más alta vale 0 pts.'},
+  {id:'g13',text:'🟢 Espada Defensiva: Tus Espadas colgadas restan en vez de sumar.'},
+  {id:'g14',text:'🟢 Basto Liviano: Los Bastos colgados valen siempre solo 1 pt.'},
+  {id:'g15',text:'🟢 Doble Cero: Si hacés 0 pts, te restás 15 del puntaje histórico.'},
+  {id:'g16',text:'🟢 Salvavidas: Si pasás de 40 pts colgados, se clava en un tope máximo de 15.'},
+  {id:'g17',text:'🟢 Socio del Cortador: Si corta tu vecino de la izquierda, sumás 0.'},
+  {id:'g18',text:'🟢 Corte Flexible: Podés cortar con cualquier carta libre.'},
+  {id:'g19',text:'🟢 Amor a los Pares: Las cartas pares colgadas valen la mitad.'},
+  {id:'g20',text:'🟢 Limpieza Total: Podés borrar tus dos cartas más altas de la mano.'},
+  {id:'g21',text:'🟢 Escalera de Impares: Armá escaleras consecutivas de números impares sin importar palo (valen 0).'},
+  {id:'g22',text:'🟢 Mosaico Libre: Armá escaleras tradicionales cruzando palos libres (valen 0).'},
+  {id:'g23',text:'🟢 Escudo del Cortador: Si corta otro y tu suma bruta es ≤ 5, sumás 0 pts netos.'},
+  {id:'g24',text:'🟢 Inversión de Marcha: Tu carta colgada más baja pasa a restar en vez de sumar.'},
+  {id:'g25',text:'🟢 Piedad de Copas: Si te quedan exactamente 2 cartas de Copa colgadas, valen 0 pts.'},
+  {id:'g26',text:'🟢 Aligerar Peso: Si tus figuras (10,11,12) colgadas suman más de 20, el exceso se perdona.'},
+  {id:'g27',text:'🟢 El Camaleón: Descartás gratis todas las cartas del palo con más presencia en tu mano.'},
+  {id:'g28',text:'🟢 Impuesto de Corte: Le robás 10 puntos al cortador si no sos vos.'},
+  {id:'g29',text:'🟢 Segunda Oportunidad: Si tus puntos superan 25, se bajan a 10 pts fijos.'}
+];
+
+const B_DICE = [
+  {id:'b1',text:'🔴 Nones Malditos: Todas tus cartas impares colgadas cuentan el doble.'},
+  {id:'b2',text:'🔴 Lluvia de Bastos: Si no tenés Bastos colgados, sumás +20 pts fijos.'},
+  {id:'b3',text:'🔴 Bloqueo de Piernas: Las piernas colgadas suman doble.'},
+  {id:'b4',text:'🔴 Figuras Pesadas: Cada figura colgada vale 25 pts fijos.'},
+  {id:'b5',text:'🔴 Espejo Oscuro: Si no cortaste, tus puntos se duplican.'},
+  {id:'b6',text:'🔴 Maldición del Oro: Cartas de Oro colgadas valen triple.'},
+  {id:'b7',text:'🔴 Penalidad de Espadas: Cada Espada colgada añade +10 pts adicionales.'},
+  {id:'b8',text:'🔴 Bastos al Cuadrado: Tus Bastos colgados valen el doble.'},
+  {id:'b9',text:'🔴 Copa Rota: Si tenés Copas colgadas, sumás +15 pts fijos adicionales.'},
+  {id:'b10',text:'🔴 Piernas Malditas: Si tenés alguna pierna colgada, tus puntos totales se duplican.'},
+  {id:'b11',text:'🔴 Escaleritis: Si tenés una escalera trunca en tu mano, sumás +20 pts fijos.'},
+  {id:'b12',text:'🔴 Pares Pesados: Tus cartas pares colgadas valen el doble.'},
+  {id:'b13',text:'🔴 El Ancla: Sumás +15 pts fijos sin importar nada.'},
+  {id:'b14',text:'🔴 Maldición del As: Si tenés un 1 colgado, vale 30 pts fijos.'},
+  {id:'b15',text:'🔴 Impuesto Progresivo: Por cada carta colgada extra más de 3, sumás +5 pts.'},
+  {id:'b16',text:'🔴 Espada en el Corazón: Si tenés exactamente 1 Espada, +25 pts fijos.'},
+  {id:'b17',text:'🔴 Figuras al Doble: Tus figuras (10,11,12) colgadas valen el doble.'},
+  {id:'b18',text:'🔴 Impuesto al Palo Excesivo: Si tenés más de 3 del mismo palo, +20 pts fijos.'},
+  {id:'b19',text:'🔴 Karma Negativo: Si tus puntos finales son múltiplo de 5, se añaden +10 pts.'},
+  {id:'b20',text:'🔴 Trampa del Ás: Si tenés un As de Espadas colgado, tus puntos se triplican.'},
+  {id:'b21',text:'🔴 Desorden Total: No combinan las piernas sueltas, sumás cada carta repetida de forma individual.'},
+  {id:'b22',text:'🔴 Carga Pesada: Si te queda colgado un 12, se duplica la suma bruta de toda tu mano.'},
+  {id:'b23',text:'🔴 Enredo de Palos: Si tenés sueltas cartas de los 4 palos diferentes, penalizás +25 pts fijos.'},
+  {id:'b24',text:'🔴 Impuesto al Oro: Cada carta de oro colgada tiene un recargo obligatorio de +5 pts fijos.'},
+  {id:'b25',text:'🔴 Grillete del Mazo: Si finalizás con exactamente 3 cartas colgadas en mano, tus puntos finales se duplican (x2).'},
+  {id:'b26',text:'🔴 Sangría del Cortador: Si corte vos la ronda, sumás +10 pts extras por corte sucio.'},
+  {id:'b27',text:'🔴 La Soga al Cuello: Tu tope de eliminación para esta ronda baja a 80 pts.'},
+  {id:'b28',text:'🔴 Efecto Contagio: Sumás tus puntos más los puntos de tu vecino izquierdo.'},
+  {id:'b29',text:'🔴 La Carta Prohibida: Si tenés la carta sorpresa oculta, tus puntos se duplican.'}
+];
+
+// ============================================================
+// ESTADO PRINCIPAL DEL JUEGO
+// ============================================================
+let scores = [[],[],[],[]];
+let history = [];
+let active = null;
+let gameOver = false;
+let selectedHandCards = [];
+
+let roundRunning = false;
+let roundCutterPlayerIdx = null;
+let timeElapsed = 0;
+let timerInterval = null;
+
+let currentRoundDice = [
+  {rolled:false,good:null,bad:null,safe:true},
+  {rolled:false,good:null,bad:null,safe:true},
+  {rolled:false,good:null,bad:null,safe:true},
+  {rolled:false,good:null,bad:null,safe:true}
+];
+let roundModifiersHistory = [];
+
+// ============================================================
+// ESTADO DEL JUEGO INTERACTIVO
+// ============================================================
+let gameDeck = [];           // Mazo restante
+let gamePile = [];           // Pozo de descarte (índice 0 = más arriba)
+let playerHands = [[],[],[],[]]; // Manos de los jugadores
+let currentTurnPlayerIdx = 0;    // Jugador cuyo turno es
+let turnPhase = 'draw';     // 'draw' | 'play' | 'discard'
+let selectedDiscardIdx = -1; // Índice de la carta seleccionada para descartar
+let interactiveRoundActive = false;
+let isFirstTurnOfRound = false; // Primer turno: descarta para abrir el pozo
+let roundStartPlayerIdx = -1;   // Jugador que inicia la ronda actual
+let lastRoundStartPlayerIdx = -1; // Para rotar entre rondas
+
+// ============================================================
+// MOTOR DE CARTAS
+// ============================================================
+function createDeck() {
+  const deck = [];
+  Object.keys(PALOS).forEach(suit => {
+    for (let n = 1; n <= 12; n++) {
+      deck.push({num: n, suit: suit});
+    }
+  });
+  return deck;
+}
+
+function shuffleDeck(deck) {
+  const d = [...deck];
+  for (let i = d.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [d[i], d[j]] = [d[j], d[i]];
+  }
+  return d;
+}
+
+function dealCards(startPlayerIdx) {
+  gameDeck = shuffleDeck(createDeck());
+  playerHands = [[],[],[],[]];
+  gamePile = []; // El pozo empieza VACÍO, el jugador inicial descartará para abrirlo
+
+  const activePlayers = players.filter((p,i) => p.activePlayer && total(i) < LIMIT);
+
+  // Repartir: el jugador inicial recibe 8 cartas, los demás 7
+  activePlayers.forEach((p) => {
+    const pi = p.idx;
+    const cardsToGet = (pi === startPlayerIdx) ? 8 : 7;
+    playerHands[pi] = gameDeck.splice(0, cardsToGet);
+  });
+
+  // Validación anti-duplicados
+  validateNoDuplicates();
+}
+
+function validateNoDuplicates() {
+  const seen = new Set();
+  const allCards = [...gameDeck, ...gamePile];
+  playerHands.forEach(hand => hand.forEach(c => allCards.push(c)));
+  let hasDup = false;
+  allCards.forEach(c => {
+    const key = `${c.num}-${c.suit}`;
+    if (seen.has(key)) { hasDup = true; console.error('DUPLICADO:', key); }
+    seen.add(key);
+  });
+  if (hasDup) {
+    // Re-repartir si hay duplicados
+    console.warn('Se detectaron duplicados, re-repartiendo...');
+    const startIdx = playerHands.findIndex(h => h.length === 8);
+    dealCards(startIdx >= 0 ? startIdx : 0);
+  }
+}
+
+function getHandAnalysis(hand) {
+  // Detecta escaleras y piernas en la mano
+  const combos = new Set(); // índices en combo
+
+  // Piernas (3+ del mismo número)
+  const numGroups = {};
+  hand.forEach((c, i) => {
+    if (!numGroups[c.num]) numGroups[c.num] = [];
+    numGroups[c.num].push(i);
+  });
+  Object.values(numGroups).forEach(group => {
+    if (group.length >= 3) group.forEach(i => combos.add(i));
+  });
+
+  // Escaleras (3+ del mismo palo consecutivo)
+  const suitGroups = {};
+  hand.forEach((c, i) => {
+    if (!suitGroups[c.suit]) suitGroups[c.suit] = [];
+    suitGroups[c.suit].push({num: c.num, idx: i});
+  });
+  Object.values(suitGroups).forEach(cards => {
+    cards.sort((a, b) => a.num - b.num);
+    let run = [cards[0]];
+    for (let i = 1; i < cards.length; i++) {
+      if (cards[i].num === run[run.length-1].num + 1) {
+        run.push(cards[i]);
+      } else {
+        if (run.length >= 3) run.forEach(c => combos.add(c.idx));
+        run = [cards[i]];
+      }
+    }
+    if (run.length >= 3) run.forEach(c => combos.add(c.idx));
+  });
+
+  const hung = hand.map((c, i) => combos.has(i) ? null : c).filter(Boolean);
+  const hangSum = hung.reduce((a, b) => a + b.num, 0);
+  return {combos, hung, hangSum};
+}
+
+function getComboType(card, idx, hand) {
+  // Returns 'stair', 'leg', or null
+  const {combos} = getHandAnalysis(hand);
+  if (!combos.has(idx)) return null;
+
+  // Check if part of a stair
+  const suitCards = hand.map((c,i) => ({...c, idx:i})).filter(c => c.suit === card.suit).sort((a,b)=>a.num-b.num);
+  for (let i = 0; i < suitCards.length - 1; i++) {
+    if (suitCards[i+1].num === suitCards[i].num + 1) {
+      // Part of a consecutive run
+      if (suitCards[i].idx === idx || suitCards[i+1].idx === idx) return 'stair';
+    }
+  }
+  return 'leg';
+}
+
+// ============================================================
+// LÓGICA DE CORTE: 2 juegos armados + carta de corte ≤ 5
+// ============================================================
+function getCutAnalysis(hand) {
+  // Detecta cuántos grupos (juegos) distintos hay en la mano
+  // y cuál es la mejor carta para cortar (≤5 y fuera de juego).
+  // Retorna: { canCut, cutCard, cutCardIdx, isPerfect, comboGroups }
+
+  // Reconstruir grupos individuales (no solo índices, sino grupos separados)
+  const groups = []; // cada grupo = array de índices
+
+  // Piernas
+  const numGroups = {};
+  hand.forEach((c, i) => {
+    if (!numGroups[c.num]) numGroups[c.num] = [];
+    numGroups[c.num].push(i);
+  });
+  Object.values(numGroups).forEach(group => {
+    if (group.length >= 3) groups.push([...group]);
+  });
+
+  // Escaleras (mismo palo consecutivo ≥3)
+  const suitGroups = {};
+  hand.forEach((c, i) => {
+    if (!suitGroups[c.suit]) suitGroups[c.suit] = [];
+    suitGroups[c.suit].push({num: c.num, idx: i});
+  });
+  Object.values(suitGroups).forEach(cards => {
+    cards.sort((a, b) => a.num - b.num);
+    let run = [cards[0]];
+    for (let i = 1; i < cards.length; i++) {
+      if (cards[i].num === run[run.length-1].num + 1) {
+        run.push(cards[i]);
+      } else {
+        if (run.length >= 3) groups.push(run.map(c => c.idx));
+        run = [cards[i]];
+      }
+    }
+    if (run.length >= 3) groups.push(run.map(c => c.idx));
+  });
+
+  // Necesitamos exactamente 2 grupos distintos (sin solaparse)
+  // Buscar la mejor combinación de 2 grupos que no se solapen
+  let bestCombo = null;
+  for (let a = 0; a < groups.length; a++) {
+    for (let b = a + 1; b < groups.length; b++) {
+      const setA = new Set(groups[a]);
+      const overlaps = groups[b].some(i => setA.has(i));
+      if (!overlaps) {
+        if (!bestCombo || (groups[a].length + groups[b].length > bestCombo[0].length + bestCombo[1].length)) {
+          bestCombo = [groups[a], groups[b]];
+        }
+      }
+    }
+  }
+
+  if (!bestCombo) return { canCut: false, cutCard: null, cutCardIdx: -1, isPerfect: false, comboGroups: [] };
+
+  const usedIndices = new Set([...bestCombo[0], ...bestCombo[1]]);
+  const freeCards = hand.map((c, i) => ({ c, i })).filter(x => !usedIndices.has(x.i));
+
+  // Corte perfecto: todos los 7 usados en los dos juegos (sin carta libre)
+  // ej: 3+4 = 7, o cualquier combinación que use todas
+  const isPerfect = freeCards.length === 0;
+
+  if (isPerfect) {
+    return { canCut: true, cutCard: null, cutCardIdx: -1, isPerfect: true, comboGroups: bestCombo };
+  }
+
+  // Corte normal: debe haber exactamente 1 carta libre con valor ≤ 5 para usar como corte
+  // (después de robar queda 8 cartas → 3+3+2 libres, o 3+4+1 libre, etc.)
+  // El jugador elige con cuál carta corta: debe ser una libre con valor ≤ 5
+  const cutCandidates = freeCards.filter(x => x.c.num <= 5);
+
+  if (cutCandidates.length > 0) {
+    // Elegir la de menor valor como sugerencia
+    cutCandidates.sort((a, b) => a.c.num - b.c.num);
+    const best = cutCandidates[0];
+    return { canCut: true, cutCard: best.c, cutCardIdx: best.i, isPerfect: false, comboGroups: bestCombo };
+  }
+
+  return { canCut: false, cutCard: null, cutCardIdx: -1, isPerfect: false, comboGroups: bestCombo };
+}
+function startInteractiveRound(firstPlayerIdx) {
+  interactiveRoundActive = true;
+  isFirstTurnOfRound = true; // El primer jugador debe descartar para abrir el pozo
+  roundStartPlayerIdx = firstPlayerIdx;
+  dealCards(firstPlayerIdx);
+  currentTurnPlayerIdx = firstPlayerIdx;
+  selectedDiscardIdx = -1;
+  showPassPlayCurtain(null, firstPlayerIdx, true);
+}
+
+function showPassPlayCurtain(prevPlayerIdx, nextPlayerIdx, isFirst) {
+  const curtain = document.getElementById('passplay-curtain');
+  const nameEl = document.getElementById('pp-next-name');
+  const emojiEl = document.getElementById('pp-next-emoji');
+  const titleEl = document.getElementById('pp-curtain-title');
+  const subEl = document.getElementById('pp-curtain-sub');
+  const btnNameEl = document.getElementById('pp-btn-name');
+  const revealBtn = document.getElementById('pp-reveal-btn');
+  const countdownEl = document.getElementById('pp-countdown');
+  const lockEl = curtain.querySelector('.pp-icon');
+
+  const nextPlayer = players[nextPlayerIdx];
+  nameEl.textContent = nextPlayer.name;
+  emojiEl.textContent = nextPlayer.init;
+  btnNameEl.textContent = nextPlayer.name;
+
+  if (isFirst) {
+    lockEl.textContent = '🃏';
+    titleEl.textContent = '¡Cartas repartidas!';
+    subEl.textContent = 'Le toca iniciar la ronda a';
+  } else {
+    lockEl.textContent = '🙈';
+    titleEl.textContent = 'Turno terminado';
+    subEl.textContent = 'Pasá el celular a';
+  }
+
+  // Bloquear el botón por 3 segundos para forzar el cambio de manos
+  revealBtn.classList.add('locked');
+  let countdown = 3;
+  countdownEl.innerHTML = `Podés revelar en <b>${countdown}</b> seg...`;
+
+  const timer = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(timer);
+      revealBtn.classList.remove('locked');
+      countdownEl.innerHTML = '';
+    } else {
+      countdownEl.innerHTML = `Podés revelar en <b>${countdown}</b> seg...`;
+    }
+  }, 1000);
+
+  curtain.classList.add('show');
+}
+
+function revealNextTurn() {
+  document.getElementById('passplay-curtain').classList.remove('show');
+  if (isFirstTurnOfRound) {
+    // El jugador inicial tiene 8 cartas y debe descartar para abrir el pozo
+    setTurnPhase('open-pile');
+  } else {
+    setTurnPhase('draw');
+  }
+  renderPlayArea();
+}
+
+function setTurnPhase(phase) {
+  turnPhase = phase;
+  selectedDiscardIdx = -1;
+  const tag = document.getElementById('turn-phase-tag');
+  tag.className = 'turn-phase-tag';
+  if (phase === 'draw') {
+    tag.classList.add('phase-draw');
+    tag.textContent = '⬆️ Fase: Robá una carta';
+    enableDeckPiles(true);
+    document.getElementById('btn-discard').classList.remove('ready');
+    document.getElementById('btn-cut').classList.remove('ready');
+  } else if (phase === 'open-pile') {
+    // Fase especial: el jugador inicial descarta para abrir el pozo
+    tag.classList.add('phase-discard');
+    tag.textContent = '🃏 Fase: Descartá una carta para abrir el pozo';
+    enableDeckPiles(false);
+    document.getElementById('btn-discard').classList.remove('ready');
+    document.getElementById('btn-cut').classList.remove('ready');
+  } else if (phase === 'play') {
+    tag.classList.add('phase-play');
+    tag.textContent = '🃏 Fase: Revisá tu mano';
+    enableDeckPiles(false);
+  } else if (phase === 'discard') {
+    tag.classList.add('phase-discard');
+    tag.textContent = '🗑️ Fase: Descartá una carta';
+    enableDeckPiles(false);
+  }
+}
+
+function enableDeckPiles(enabled) {
+  const mazo = document.getElementById('pile-mazo');
+  const pozo = document.getElementById('pile-pozo');
+  const deckVis = document.getElementById('deck-visual');
+  const pozoVis = document.getElementById('pozo-visual');
+
+  if (enabled) {
+    deckVis.classList.add('highlight-draw');
+    if (gamePile.length > 0) pozoVis.classList.add('highlight-draw');
+    mazo.style.cursor = 'pointer';
+    pozo.style.cursor = gamePile.length > 0 ? 'pointer' : 'default';
+  } else {
+    deckVis.classList.remove('highlight-draw');
+    pozoVis.classList.remove('highlight-draw');
+    mazo.style.cursor = 'default';
+    pozo.style.cursor = 'default';
+  }
+}
+
+function drawFromDeck() {
+  if (turnPhase !== 'draw') return;
+  if (gameDeck.length === 0) {
+    // Reciclar pozo
+    const topCard = gamePile[0];
+    gameDeck = shuffleDeck(gamePile.slice(1));
+    gamePile = [topCard];
+    toast('♻️ Mazo agotado, se rebarajó el pozo.');
+    if (gameDeck.length === 0) { toast('⚠️ Sin cartas disponibles'); return; }
+  }
+  const card = gameDeck.splice(0, 1)[0];
+  playerHands[currentTurnPlayerIdx].push(card);
+  setTurnPhase('play');
+  renderPlayArea();
+  toast(`${players[currentTurnPlayerIdx].name} robó del mazo.`);
+}
+
+function drawFromPile() {
+  if (turnPhase !== 'draw') return;
+  if (gamePile.length === 0) { toast('El pozo está vacío'); return; }
+  const card = gamePile.splice(0, 1)[0];
+  playerHands[currentTurnPlayerIdx].push(card);
+  setTurnPhase('play');
+  renderPlayArea();
+  toast(`${players[currentTurnPlayerIdx].name} tomó del pozo: ${PALOS[card.suit].emoji}${card.num}`);
+}
+
+function selectHandCard(idx) {
+  if (turnPhase === 'draw') {
+    toast('Primero robá una carta del mazo o del pozo.');
+    return;
+  }
+  // Toggle: deseleccionar si ya está seleccionada, seleccionar si no
+  selectedDiscardIdx = (selectedDiscardIdx === idx) ? -1 : idx;
+  renderHandGrid();
+  updateActionButtons();
+}
+
+function updateActionButtons() {
+  const hand = playerHands[currentTurnPlayerIdx];
+  const discardBtn = document.getElementById('btn-discard');
+  const cutBtn = document.getElementById('btn-cut');
+
+  // El botón de descartar se habilita si hay una carta seleccionada
+  if (selectedDiscardIdx >= 0) {
+    discardBtn.classList.add('ready');
+    if (turnPhase === 'play') setTurnPhase('discard');
+  } else {
+    discardBtn.classList.remove('ready');
+  }
+
+  // Nueva lógica de corte: 2 juegos armados + carta libre ≤ 5 (o corte perfecto)
+  const {canCut} = getCutAnalysis(hand);
+  const canCutNow = (turnPhase === 'play' || turnPhase === 'discard') && canCut;
+  if (canCutNow) {
+    cutBtn.classList.add('ready');
+  } else {
+    cutBtn.classList.remove('ready');
+  }
+}
+
+function discardSelectedCard() {
+  if (selectedDiscardIdx < 0) { toast('Seleccioná una carta primero.'); return; }
+  const hand = playerHands[currentTurnPlayerIdx];
+  const discarded = hand.splice(selectedDiscardIdx, 1)[0];
+  gamePile.unshift(discarded);
+  selectedDiscardIdx = -1;
+
+  if (isFirstTurnOfRound) {
+    // El jugador inicial descartó para abrir el pozo, ahora tiene 7 cartas
+    // Su turno continúa normalmente (ya jugó, no roba, avanza)
+    isFirstTurnOfRound = false;
+    toast(`${players[currentTurnPlayerIdx].name} abrió el pozo con ${PALOS[discarded.suit].emoji}${discarded.num}`);
+    advanceTurn();
+  } else {
+    // Avanzar turno normal
+    advanceTurn();
+  }
+}
+
+function triggerCut() {
+  const hand = playerHands[currentTurnPlayerIdx];
+  const cutInfo = getCutAnalysis(hand);
+
+  if (!cutInfo.canCut) {
+    toast('Para cortar necesitás 2 juegos armados (3 cartas c/u) y al menos una carta libre ≤ 5.');
+    return;
+  }
+
+  // Corte perfecto: todas las cartas están en juegos
+  if (cutInfo.isPerfect) {
+    roundCutterPlayerIdx = currentTurnPlayerIdx;
+    window._perfectCut = true;
+  } else {
+    // Corte normal: sacar la carta de corte y ponerla boca abajo en el pozo
+    const cutCardIdx = cutInfo.cutCardIdx;
+    const cutCard = hand[cutCardIdx];
+    const removedCard = hand.splice(cutCardIdx, 1)[0];
+    gamePile.unshift({ ...removedCard, isCutCard: true });
+    roundCutterPlayerIdx = currentTurnPlayerIdx;
+    window._perfectCut = false;
+    toast(`💥 ${players[currentTurnPlayerIdx].name} cortó con ${PALOS[cutCard.suit].emoji}${cutCard.num}`);
+  }
+
+  // Mostrar pantalla de revelación de mazos antes de confirmar puntos
+  showCutRevealScreen();
+}
+
+function showCutRevealScreen() {
+  const cutter = players[roundCutterPlayerIdx];
+  const isPerfect = window._perfectCut;
+
+  document.getElementById('cut-reveal-title').textContent = isPerfect
+    ? `✨ ¡Corte perfecto de ${cutter.name}!`
+    : `💥 ¡${cutter.name} cortó la ronda!`;
+  document.getElementById('cut-reveal-sub').textContent = 'Estos son los mazos de todos los jugadores:';
+
+  const PALO_SYMBOLS_SM = { basto:'🌿', espada:'⚔', oro:'●', copa:'🏆' };
+  const PALO_SYMBOLS_BIG = { basto:'🌿', espada:'⚔️', oro:'🪙', copa:'🏆' };
+
+  let html = '';
+  players.forEach((p, i) => {
+    if (!p.activePlayer || total(i) >= LIMIT) return;
+    const hand = playerHands[i];
+    const { combos, hung, hangSum } = getHandAnalysis(hand);
+    const isCutter = i === roundCutterPlayerIdx;
+
+    // Color de borde según jugador
+    const borderColors = ['#4fa3e8','#e06fa0','#3fcaa0','#f5b84a'];
+    const border = isCutter ? '#f5b84a' : borderColors[i];
+
+    // Mostrar también la carta de corte si está en el pozo con isCutCard
+    let extraCard = '';
+    if (isCutter && gamePile.length > 0 && gamePile[0].isCutCard) {
+      const cc = gamePile[0];
+      extraCard = `
+        <div class="mini-card cut-card mc-${cc.suit}" title="Carta de corte (boca abajo)">
+          <div class="mc-corner tl"><span class="mc-num">${cc.num}</span><span class="mc-suit">${PALO_SYMBOLS_SM[cc.suit]}</span></div>
+          <div class="mc-center">${PALO_SYMBOLS_BIG[cc.suit]}</div>
+          <div class="mc-corner br"><span class="mc-num">${cc.num}</span><span class="mc-suit">${PALO_SYMBOLS_SM[cc.suit]}</span></div>
+        </div>`;
+    }
+
+    const cardsHtml = hand.map((c, ci) => {
+      const isHung = !combos.has(ci);
+      const cls = isHung ? 'mini-card-hung' : 'mini-card-combo';
+      return `
+        <div class="mini-card ${cls} mc-${c.suit}">
+          <div class="mc-corner tl"><span class="mc-num">${c.num}</span><span class="mc-suit">${PALO_SYMBOLS_SM[c.suit]}</span></div>
+          <div class="mc-center">${PALO_SYMBOLS_BIG[c.suit]}</div>
+          <div class="mc-corner br"><span class="mc-num">${c.num}</span><span class="mc-suit">${PALO_SYMBOLS_SM[c.suit]}</span></div>
+        </div>`;
+    }).join('') + extraCard;
+
+    const roleTag = isCutter
+      ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#1a3d0a;color:#7ddd3a;border:1px solid #3a7a10;font-weight:600">💥 CORTÓ</span>`
+      : `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(0,0,0,0.3);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);font-weight:600">🐌 Remolque</span>`;
+
+    const hungLabel = hung.length === 0
+      ? `<span style="color:#7ddd3a;font-size:11px">✅ Todo combinado</span>`
+      : `<span style="color:#f5b84a;font-size:11px">${hung.length} colgadas = ${hangSum} pts brutos</span>`;
+
+    html += `
+      <div class="cut-reveal-player p${i}" style="border-color:${border};background:rgba(${i===0?'13,34,64':i===1?'61,13,36':i===2?'10,46,30':'48,26,0'},0.6)">
+        <div class="cut-reveal-player-header">
+          <span style="font-size:22px">${p.init}</span>
+          <span class="cut-reveal-player-name" style="color:${border}">${p.name}</span>
+          ${roleTag}
+          <span style="margin-left:auto;font-size:12px;color:rgba(255,255,255,0.45)">${total(i)} pts acum.</span>
+        </div>
+        <div class="cut-reveal-cards">${cardsHtml}</div>
+        <div style="margin-top:8px">${hungLabel}</div>
+      </div>`;
+  });
+
+  document.getElementById('cut-reveal-grid').innerHTML = html;
+  document.getElementById('cut-reveal-screen').classList.add('show');
+}
+
+function advanceTurn() {
+  // Encontrar siguiente jugador activo y vivo
+  const activePlayers = players.filter((p,i) => p.activePlayer && total(i) < LIMIT);
+  if (activePlayers.length < 2) return;
+
+  let nextIdx = currentTurnPlayerIdx;
+  for (let attempts = 0; attempts < 4; attempts++) {
+    nextIdx = (nextIdx + 1) % 4;
+    if (players[nextIdx].activePlayer && total(nextIdx) < LIMIT) break;
+  }
+
+  const prevIdx = currentTurnPlayerIdx;
+  currentTurnPlayerIdx = nextIdx;
+  selectedDiscardIdx = -1;
+  // Limpiar la mano visualmente antes de mostrar la cortina
+  // para que ningún jugador vea las cartas del siguiente
+  const handGrid = document.getElementById('hand-grid');
+  if (handGrid) handGrid.innerHTML = '';
+  // NO renderizamos el play area antes de mostrar la cortina
+  // para que el jugador anterior no vea las cartas del siguiente.
+  // renderPlayArea() se llama recién en revealNextTurn().
+  showPassPlayCurtain(prevIdx, nextIdx, false);
+}
+
+// ============================================================
+// MODAL DE CONFIRMACIÓN DE CORTE
+// ============================================================
+function openCutConfirmModal() {
+  // Cerrar pantalla de revelación si está abierta
+  document.getElementById('cut-reveal-screen').classList.remove('show');
+
+  const overlay = document.getElementById('cut-overlay');
+  const inner = document.getElementById('cut-players-list');
+
+  let html = '';
+  players.forEach((p, i) => {
+    if (!p.activePlayer || total(i) >= LIMIT) return;
+    const hand = playerHands[i];
+    const isCutter = i === roundCutterPlayerIdx;
+    const {combos, hung, hangSum} = getHandAnalysis(hand);
+
+    const roleHtml = isCutter
+      ? `<span class="cpr-role role-cutter">💥 CORTADOR</span>`
+      : `<span class="cpr-role role-normal">🐌 Remolque</span>`;
+
+    const handCardsHtml = hand.map((c, ci) => {
+      const isHung = !combos.has(ci);
+      return `<span class="cpr-hand-card ${isHung ? 'cpr-hung' : 'cpr-combo'}">${PALOS[c.suit].emoji}${c.num}</span>`;
+    }).join('');
+
+    const diceState = currentRoundDice[i];
+    let diceInfo = '';
+    if (useDiceMode) {
+      diceInfo = diceState?.safe
+        ? `<div style="font-size:10px;color:#4fa3e8;margin-top:4px">🛡️ Seguro (-10 pts)</div>`
+        : `<div style="font-size:10px;margin-top:4px;color:rgba(255,255,255,0.5)">${diceState?.good?.text.substring(0,50)}...</div>`;
+    }
+
+    html += `
+      <div class="cut-player-row p${i}">
+        <div class="cpr-header">
+          <span style="font-size:20px">${p.init}</span>
+          <span class="cpr-name" style="color:var(--c1)">${p.name}</span>
+          ${roleHtml}
+          <span style="margin-left:auto;font-size:12px;color:rgba(255,255,255,0.5)">${total(i)} pts acum.</span>
+        </div>
+        <div class="cpr-hand-preview">${handCardsHtml}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5)">
+          Cartas colgadas: <b style="color:#f5b84a">${hung.map(c=>PALOS[c.suit].emoji+c.num).join(', ')||'Ninguna (¡Perfecto!)'}</b>
+          &nbsp;→ Bruto: <b style="color:#f5b84a">${hangSum} pts</b>
+        </div>
+        ${diceInfo}
+      </div>
+    `;
+  });
+
+  inner.innerHTML = html;
+  overlay.classList.add('open');
+}
+
+function confirmCutRound() {
+  document.getElementById('cut-overlay').classList.remove('open');
+
+  // Registrar puntajes usando las manos actuales del juego
+  interactiveRoundActive = false;
+  history.push(JSON.parse(JSON.stringify(scores)));
+  if (!window._tempRoundMods) window._tempRoundMods = {};
+
+  players.forEach((p, i) => {
+    if (!p.activePlayer || total(i) >= LIMIT) return;
+    const hand = playerHands[i];
+    const {hung} = getHandAnalysis(hand);
+    selectedHandCards = hung;
+    active = i;
+    const pts = computeFinalPoints(i, hung);
+    if (!window._tempRoundMods[i]) window._tempRoundMods[i] = '';
+    scores[i].push(pts.finalPts);
+    window._tempRoundMods[i] = pts.modStrings.join(' | ');
+  });
+
+  active = null;
+  selectedHandCards = [];
+
+  // Reset del estado interactivo
+  playerHands = [[],[],[],[]];
+  gameDeck = [];
+  gamePile = [];
+  selectedDiscardIdx = -1;
+  isFirstTurnOfRound = false;
+
+  // Ocultar play area, mostrar scores
+  document.getElementById('play-area').style.display = 'none';
+  document.getElementById('scores-panel').style.display = 'block';
+
+  checkAndFinalizeRoundData();
+  saveState();
+  render();
+  toast('✅ Ronda finalizada. Puntos registrados.');
+}
+
+// ============================================================
+// CÁLCULO DE PUNTOS (reutiliza toda la lógica existente)
+// ============================================================
+function computeFinalPoints(playerIdx, hungCards) {
+  const rState = currentRoundDice[playerIdx];
+  const cortóYo = playerIdx === roundCutterPlayerIdx;
+  let finalPts = 0;
+  let modStrings = [];
+
+  let handSummary = hungCards.length > 0
+    ? `[${hungCards.map(c => PALOS[c.suit].emoji + c.num).join(',')}]`
+    : '0 pts';
+  modStrings.push(handSummary);
+
+  if (!useDiceMode) {
+    finalPts = hungCards.reduce((a, b) => a + b.num, 0);
+  } else {
+    if (rState && rState.safe) {
+      let baseSum = hungCards.reduce((a, b) => a + b.num, 0);
+      finalPts = baseSum - 10;
+      modStrings.push("Seguro (-10)");
+    } else if (rState) {
+      modStrings.push(`Dados [${rState.good.id}/${rState.bad.id}]`);
+      let cartasEvaluadas = [...hungCards];
+
+      if (rState.good.id === 'g20' && cartasEvaluadas.length > 0) {
+        cartasEvaluadas.sort((a,b) => b.num - a.num);
+        let removidas = cartasEvaluadas.splice(0, 2);
+        modStrings.push(`Limpieza (-${removidas.map(c=>c.num).reduce((a,b)=>a+b,0)}pts)`);
+      }
+
+      let maxCardIndex = -1;
+      if (rState.good.id === 'g12' && cartasEvaluadas.length > 0) {
+        let maxVal = -1;
+        cartasEvaluadas.forEach((c, idx) => { if (c.num > maxVal) { maxVal = c.num; maxCardIndex = idx; } });
+      }
+      let minCardIndex = -1;
+      if (rState.good.id === 'g24' && cartasEvaluadas.length > 0) {
+        let minVal = 999;
+        cartasEvaluadas.forEach((c, idx) => { if (c.num < minVal) { minVal = c.num; minCardIndex = idx; } });
+      }
+
+      let indicesExcluidosG21G22 = [];
+      if (rState.good.id === 'g21') {
+        let odds = cartasEvaluadas.map((c,idx)=>({num:c.num,idx})).filter(o=>o.num%2!==0).sort((a,b)=>a.num-b.num);
+        for (let i = 0; i < odds.length-1; i++) {
+          if (odds[i+1].num === odds[i].num + 2) { indicesExcluidosG21G22.push(odds[i].idx, odds[i+1].idx); }
+        }
+      }
+      if (rState.good.id === 'g22') {
+        let sorted = cartasEvaluadas.map((c,idx)=>({num:c.num,idx})).sort((a,b)=>a.num-b.num);
+        for (let i = 0; i < sorted.length-1; i++) {
+          if (sorted[i+1].num === sorted[i].num + 1) { indicesExcluidosG21G22.push(sorted[i].idx, sorted[i+1].idx); }
+        }
+      }
+
+      if (rState.good.id === 'g27' && cartasEvaluadas.length > 0) {
+        let counts = {basto:0,espada:0,oro:0,copa:0};
+        cartasEvaluadas.forEach(c => counts[c.suit]++);
+        let maxSuit = 'basto';
+        Object.keys(counts).forEach(s => { if (counts[s] > counts[maxSuit]) maxSuit = s; });
+        cartasEvaluadas = cartasEvaluadas.filter(c => c.suit !== maxSuit);
+        modStrings.push(`Camaleón (Borrado ${maxSuit})`);
+      }
+
+      let sumaFigurasG26 = 0;
+      cartasEvaluadas.forEach((card, idx) => {
+        if (indicesExcluidosG21G22.includes(idx)) return;
+        let cardValue = card.num;
+        if (idx === maxCardIndex && rState.good.id === 'g12') cardValue = 0;
+        if (idx === minCardIndex && rState.good.id === 'g24') cardValue = -cardValue;
+        if (rState.good.id === 'g3' && (card.num===10||card.num===11||card.num===12)) cardValue = 0;
+        if (rState.good.id === 'g6' && card.suit === 'oro') cardValue = 0;
+        if (rState.good.id === 'g7' && card.suit === 'copa') cardValue = Math.round(cardValue/2);
+        if (rState.good.id === 'g8' && card.num%2!==0) cardValue = 0;
+        if (rState.good.id === 'g9' && card.num===12) cardValue = 0;
+        if (rState.good.id === 'g13' && card.suit==='espada') cardValue = -cardValue;
+        if (rState.good.id === 'g14' && card.suit==='basto') cardValue = 1;
+        if (rState.good.id === 'g19' && card.num%2===0) cardValue = Math.round(cardValue/2);
+        if (rState.good.id === 'g26' && (card.num===10||card.num===11||card.num===12)) sumaFigurasG26 += cardValue;
+        if (rState.bad.id === 'b1' && card.num%2!==0) cardValue = cardValue*2;
+        if (rState.bad.id === 'b4' && (card.num===10||card.num===11||card.num===12)) cardValue = 25;
+        if (rState.bad.id === 'b6' && card.suit==='oro') cardValue = cardValue*3;
+        if (rState.bad.id === 'b7' && card.suit==='espada') cardValue += 10;
+        if (rState.bad.id === 'b8' && card.suit==='basto') cardValue = cardValue*2;
+        if (rState.bad.id === 'b12' && card.num%2===0) cardValue = cardValue*2;
+        if (rState.bad.id === 'b14' && card.num===1) cardValue = 30;
+        if (rState.bad.id === 'b17' && (card.num===10||card.num===11||card.num===12)) cardValue = cardValue*2;
+        if (rState.bad.id === 'b24' && card.suit==='oro') cardValue += 5;
+        finalPts += cardValue;
+      });
+
+      if (rState.good.id === 'g25') {
+        let countCopas = cartasEvaluadas.filter(c=>c.suit==='copa').length;
+        if (countCopas===2) {
+          let copaSum = cartasEvaluadas.filter(c=>c.suit==='copa').reduce((a,b)=>a+b.num,0);
+          finalPts -= copaSum; modStrings.push("Piedad Copas");
+        }
+      }
+      if (rState.good.id === 'g26' && sumaFigurasG26 > 20) {
+        finalPts -= (sumaFigurasG26-20); modStrings.push("Aligerar Peso");
+      }
+      if (rState.good.id === 'g29' && finalPts > 25) {
+        finalPts = 10; modStrings.push("Segunda Oportunidad");
+      }
+      if (rState.bad.id === 'b22' && cartasEvaluadas.some(c=>c.num===12)) {
+        finalPts *= 2; modStrings.push("Carga Pesada (x2)");
+      }
+      if (rState.bad.id === 'b29') {
+        let roundSeed = scores[0].length + 1;
+        let forbiddenNum = ((roundSeed*7)%12)+1;
+        if (cartasEvaluadas.some(c=>c.num===forbiddenNum)) {
+          finalPts *= 2; modStrings.push(`Carta Prohibida [${forbiddenNum}] (x2)`);
+        } else {
+          modStrings.push(`Zafó Prohibida [${forbiddenNum}]`);
+        }
+      }
+      if (rState.bad.id === 'b10' && rState.bad.id !== 'b21') {
+        let numCounts = {};
+        cartasEvaluadas.forEach(c => numCounts[c.num]=(numCounts[c.num]||0)+1);
+        if (Object.values(numCounts).some(v=>v>=2)) { finalPts *= 2; modStrings.push("Piernas Malditas (x2)"); }
+      }
+      let suitsGroupE = {basto:[],espada:[],oro:[],copa:[]};
+      cartasEvaluadas.forEach(c => suitsGroupE[c.suit].push(c.num));
+      let tieneEscaleraRota = false;
+      Object.keys(suitsGroupE).forEach(s => {
+        let nums = suitsGroupE[s].sort((a,b)=>a-b);
+        for (let i=0;i<nums.length-1;i++) { if (nums[i+1]===nums[i]+1) tieneEscaleraRota = true; }
+      });
+      if (rState.bad.id === 'b11' && tieneEscaleraRota) { finalPts += 20; modStrings.push("Escaleritis (+20)"); }
+      if (!cortóYo) {
+        if (rState.good.id === 'g4') { finalPts = Math.round(finalPts/2); modStrings.push("Anestésico (/2)"); }
+        if (rState.bad.id === 'b5') { finalPts = finalPts*2; modStrings.push("Espejo (x2)"); }
+        if (rState.good.id === 'g23') {
+          let bruteSumBase = hungCards.reduce((a,b)=>a+b.num,0);
+          if (bruteSumBase<=5) { finalPts = 0; modStrings.push("Escudo Cortador"); }
+        }
+      } else {
+        if (rState.good.id === 'g11') { finalPts -= 15; modStrings.push("Viento Favor (-15)"); }
+        if (rState.bad.id === 'b26') { finalPts += 10; modStrings.push("Sangría Cortador (+10)"); }
+      }
+      if (rState.good.id === 'g1') { finalPts -= 20; modStrings.push("Borrón (-20)"); }
+      if (rState.good.id === 'g10') { finalPts -= 10; modStrings.push("Escalera (-10)"); }
+      let totalSuits = {basto:0,espada:0,oro:0,copa:0};
+      cartasEvaluadas.forEach(c => totalSuits[c.suit]++);
+      if (rState.bad.id === 'b18' && Object.values(totalSuits).some(count=>count>3)) { finalPts += 20; modStrings.push("Impuesto Palo (+20)"); }
+      if (rState.bad.id === 'b23' && totalSuits.basto>0&&totalSuits.espada>0&&totalSuits.oro>0&&totalSuits.copa>0) { finalPts += 25; modStrings.push("Enredo Palos (+25)"); }
+      if (rState.bad.id === 'b9' && cartasEvaluadas.some(c=>c.suit==='copa')) { finalPts += 15; modStrings.push("Copa Rota (+15)"); }
+      if (rState.bad.id === 'b13') { finalPts += 15; modStrings.push("El Ancla (+15)"); }
+      if (rState.good.id === 'g16' && finalPts>40) { finalPts = 15; modStrings.push("Salvavidas (Máx 15)"); }
+      if (rState.bad.id === 'b25' && cartasEvaluadas.length===3) { finalPts *= 2; modStrings.push("Grillete Mazo (x2)"); }
+      if (rState.bad.id === 'b27') { modStrings.push("Soga al cuello (Límite 80)"); }
+    }
+  }
+
+  // Cutter gets 0 in classic mode
+  if (!useDiceMode && cortóYo) {
+    finalPts = 0;
+    modStrings = ['💥 Cortó (0 pts)'];
+  }
+
+  return {finalPts, modStrings};
+}
+
+// ============================================================
+// RENDERIZADO DEL ÁREA DE JUEGO INTERACTIVO
+// ============================================================
+function renderPlayArea() {
+  if (!interactiveRoundActive) return;
+
+  const pi = currentTurnPlayerIdx;
+  const p = players[pi];
+  const hand = playerHands[pi];
+  const {combos, hung, hangSum} = getHandAnalysis(hand);
+
+  // Actualizar encabezado del turno
+  const header = document.getElementById('turn-header');
+  header.className = `turn-header p${pi}`;
+
+  document.getElementById('turn-avatar').textContent = p.init;
+  document.getElementById('turn-name').textContent = p.name;
+  document.getElementById('turn-score-label').textContent = `${total(pi)} pts acumulados`;
+
+  // Mazo visual
+  const deckVis = document.getElementById('deck-visual');
+  deckVis.className = `deck-card-visual deck-back`;
+  if (turnPhase === 'draw') deckVis.classList.add('highlight-draw', 'clickable');
+  else deckVis.classList.add('clickable'); // still show but dimmed
+  document.getElementById('deck-count-label').textContent = `${gameDeck.length} cartas`;
+
+  // Pozo visual - estilo naipe español
+  const PALO_TEXT_COLORS = {'basto':'#2a7a3b','espada':'#1a3a6e','oro':'#8a5c00','copa':'#8a1a1a'};
+  const pozoVis = document.getElementById('pozo-visual');
+  if (gamePile.length > 0) {
+    const topCard = gamePile[0];
+    pozoVis.className = `deck-card-visual clickable`;
+    if (turnPhase === 'draw') pozoVis.classList.add('highlight-draw');
+    pozoVis.style.background = `linear-gradient(160deg,#fdf6e3 0%,#f5e9c8 100%)`;
+    pozoVis.style.borderColor = PALO_TEXT_COLORS[topCard.suit];
+    pozoVis.style.borderWidth = '2px';
+    pozoVis.style.borderStyle = 'solid';
+    pozoVis.style.color = PALO_TEXT_COLORS[topCard.suit];
+    pozoVis.innerHTML = `<div class="pile-card-inner"><div class="pile-card-num" style="color:${PALO_TEXT_COLORS[topCard.suit]};font-size:28px;font-weight:900">${topCard.num}</div><div class="pile-card-suit" style="font-size:18px">${PALOS[topCard.suit].emoji}</div></div>`;
+    document.getElementById('pozo-label').textContent = `${PALOS[topCard.suit].name} ${topCard.num}`;
+  } else {
+    pozoVis.className = 'deck-card-visual deck-empty';
+    pozoVis.style.cssText = '';
+    pozoVis.innerHTML = 'vacío';
+    document.getElementById('pozo-label').textContent = 'vacío';
+  }
+
+  // Análisis en vivo — usa nueva lógica de corte
+  const cutInfo = getCutAnalysis(hand);
+  const cutPointsEl = document.getElementById('cut-points-display');
+  cutPointsEl.textContent = (turnPhase === 'draw' || turnPhase === 'open-pile') ? '-' : `${hangSum} pts`;
+  cutPointsEl.className = `cut-points ${cutInfo.canCut && turnPhase !== 'draw' && turnPhase !== 'open-pile' ? 'can-cut' : ''}`;
+
+  let analysisText = '';
+  if (turnPhase === 'draw') {
+    analysisText = 'Robá una carta para ver el análisis.';
+  } else if (turnPhase === 'open-pile') {
+    analysisText = `🃏 Sos el primer jugador. Tenés <b>8 cartas</b>. Seleccioná una para <b>abrir el pozo</b> y quedar con 7.`;
+  } else {
+    const comboCount = combos.size;
+    const hungCount = hung.length;
+    if (cutInfo.isPerfect) {
+      analysisText = `✨ <b style="color:#7ddd3a">¡Corte perfecto disponible!</b> Todos tus grupos armados. Podés cortar con 0 pts.`;
+    } else if (cutInfo.canCut) {
+      analysisText = `💥 <b style="color:#7ddd3a">¡Podés cortar!</b> 2 juegos armados + carta de corte: <b style="color:#f5b84a">${PALOS[cutInfo.cutCard.suit].emoji}${cutInfo.cutCard.num}</b> (va boca abajo).`;
+    } else if (hungCount === 0) {
+      analysisText = `✅ Todo combinado. <b>Corte perfecto disponible.</b>`;
+    } else {
+      const gruposCount = cutInfo.comboGroups ? cutInfo.comboGroups.length : 0;
+      if (gruposCount >= 2) {
+        analysisText = `2 juegos armados ✓ — pero ninguna carta libre es ≤ 5. <span style="color:rgba(255,255,255,0.4)">Necesitás una libre ≤5 para cortar.</span>`;
+      } else {
+        const comboText = comboCount > 0 ? `${comboCount} cartas en combos. ` : '';
+        analysisText = comboText + `<span style="color:rgba(255,255,255,0.4)">Necesitás 2 juegos armados (3 c/u) + carta libre ≤5 para cortar.</span>`;
+      }
+      if (hungCount > 0) {
+        analysisText += `<br>Colgadas: <b>${hung.map(c=>PALOS[c.suit].emoji+c.num).join(' ')}</b> = ${hangSum} pts`;
+      }
+    }
+
+    // Dados hint
+
+    if (useDiceMode) {
+      const rState = currentRoundDice[pi];
+      if (rState?.rolled) {
+        analysisText += `<br><span style="color:#7ddd3a;font-size:10px">${rState.good.text.substring(0,60)}</span>`;
+        analysisText += `<br><span style="color:#ff7070;font-size:10px">${rState.bad.text.substring(0,60)}</span>`;
+      } else if (rState?.safe) {
+        analysisText += `<br><span style="color:#4fa3e8;font-size:10px">🛡️ Modo Seguro activo (-10 pts final)</span>`;
+      }
+    }
+  }
+  document.getElementById('live-analysis-text').innerHTML = analysisText;
+
+  // Mano del jugador
+  renderHandGrid();
+  document.getElementById('hand-count-label').textContent = `${hand.length} cartas`;
+  updateActionButtons();
+}
+
+function renderHandGrid() {
+  const pi = currentTurnPlayerIdx;
+  const hand = playerHands[pi];
+  const {combos} = getHandAnalysis(hand);
+  const grid = document.getElementById('hand-grid');
+
+  const PALO_SYMBOLS = {'basto':'🌿','espada':'⚔','oro':'●','copa':'🏆'};
+  const PALO_SYMBOL_BIG = {'basto':'🌿','espada':'⚔️','oro':'🪙','copa':'🏆'};
+
+  grid.innerHTML = hand.map((card, idx) => {
+    const isSelected = idx === selectedDiscardIdx;
+    const comboType = getComboType(card, idx, hand);
+    let classes = `hand-card suit-${card.suit}`;
+    if (comboType === 'stair') classes += ' combo-stair';
+    else if (comboType === 'leg') classes += ' combo-leg';
+    if (isSelected) classes += ' selected-discard';
+
+    let badgeHtml = '';
+    if (comboType === 'stair') badgeHtml = `<div class="combo-badge">ESC</div>`;
+    else if (comboType === 'leg') badgeHtml = `<div class="combo-badge">PIE</div>`;
+
+    return `<div class="${classes}" data-idx="${idx}">
+        ${badgeHtml}
+        <div class="hc-corner top-left">
+          <span class="hc-num">${card.num}</span>
+          <span class="hc-suit">${PALO_SYMBOLS[card.suit]}</span>
+        </div>
+        <div class="hc-center">
+          <span class="hc-suit-big">${PALO_SYMBOL_BIG[card.suit]}</span>
+        </div>
+        <div class="hc-corner bot-right">
+          <span class="hc-num">${card.num}</span>
+          <span class="hc-suit">${PALO_SYMBOLS[card.suit]}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Adjuntar listeners después de inyectar el HTML
+  attachHandCardListeners();
+}
+
+// ============================================================
+// DRAG-TO-REORDER + TAP-TO-SELECT
+// ============================================================
+let _dragSrcIdx = null;     // índice origen del drag
+let _dragLongPress = null;  // timer de long-press
+let _dragClone = null;      // elemento flotante mientras arrastrás
+let _tapMoved = false;      // para distinguir tap de drag
+
+function attachHandCardListeners() {
+  const grid = document.getElementById('hand-grid');
+  const cards = grid.querySelectorAll('.hand-card');
+
+  cards.forEach((el) => {
+    // Touch: long-press = drag, tap rápido = select
+    el.addEventListener('touchstart', onCardTouchStart, {passive:false});
+    el.addEventListener('touchmove', onCardTouchMove, {passive:false});
+    el.addEventListener('touchend', onCardTouchEnd, {passive:false});
+    el.addEventListener('touchcancel', onCardTouchEnd, {passive:false});
+    // Mouse (desktop fallback)
+    el.addEventListener('mousedown', onCardMouseDown);
+  });
+}
+
+function getCardIdxFromEl(el) {
+  return parseInt(el.closest('.hand-card').dataset.idx, 10);
+}
+
+/* ── TOUCH ── */
+let _touchStartX = 0, _touchStartY = 0, _touchCurX = 0, _touchCurY = 0;
+let _touchDragging = false;
+
+function onCardTouchStart(e) {
+  const card = e.currentTarget;
+  _dragSrcIdx = getCardIdxFromEl(card);
+  _touchStartX = e.touches[0].clientX;
+  _touchStartY = e.touches[0].clientY;
+  _touchCurX = _touchStartX;
+  _touchCurY = _touchStartY;
+  _tapMoved = false;
+  _touchDragging = false;
+
+  // Long-press para iniciar drag (180ms)
+  _dragLongPress = setTimeout(() => {
+    _touchDragging = true;
+    startDragClone(card, _touchStartX, _touchStartY);
+    if (navigator.vibrate) navigator.vibrate(30);
+  }, 180);
+}
+
+function onCardTouchMove(e) {
+  const dx = e.touches[0].clientX - _touchStartX;
+  const dy = e.touches[0].clientY - _touchStartY;
+  _touchCurX = e.touches[0].clientX;
+  _touchCurY = e.touches[0].clientY;
+
+  if (Math.abs(dx) > 6 || Math.abs(dy) > 6) _tapMoved = true;
+
+  if (_touchDragging) {
+    e.preventDefault();
+    moveDragClone(_touchCurX, _touchCurY);
+    updateDragOverIndicator(_touchCurX, _touchCurY);
+  } else if (_tapMoved) {
+    // Se movió antes del long-press: cancela drag, deja scroll
+    clearTimeout(_dragLongPress);
+    _dragLongPress = null;
+  }
+}
+
+function onCardTouchEnd(e) {
+  clearTimeout(_dragLongPress);
+  _dragLongPress = null;
+
+  if (_touchDragging) {
+    e.preventDefault();
+    finishDrag(_touchCurX, _touchCurY);
+    _touchDragging = false;
+  } else if (!_tapMoved) {
+    // Fue un tap: seleccionar carta
+    selectHandCard(_dragSrcIdx);
+  }
+  removeDragOverIndicators();
+  removeDragClone();
+  _dragSrcIdx = null;
+}
+
+/* ── MOUSE (desktop) ── */
+let _mouseDragging = false;
+
+function onCardMouseDown(e) {
+  if (e.button !== 0) return;
+  const card = e.currentTarget;
+  _dragSrcIdx = getCardIdxFromEl(card);
+  _tapMoved = false;
+  _mouseDragging = false;
+
+  const onMove = (me) => {
+    const dx = me.clientX - e.clientX;
+    const dy = me.clientY - e.clientY;
+    if (!_mouseDragging && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+      _mouseDragging = true;
+      startDragClone(card, e.clientX, e.clientY);
+    }
+    if (_mouseDragging) {
+      moveDragClone(me.clientX, me.clientY);
+      updateDragOverIndicator(me.clientX, me.clientY);
+    }
+  };
+  const onUp = (me) => {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    if (_mouseDragging) {
+      finishDrag(me.clientX, me.clientY);
+    } else {
+      selectHandCard(_dragSrcIdx);
+    }
+    removeDragOverIndicators();
+    removeDragClone();
+    _mouseDragging = false;
+    _dragSrcIdx = null;
+  };
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ── CLONE FLOTANTE ── */
+function startDragClone(sourceEl, x, y) {
+  removeDragClone();
+  const rect = sourceEl.getBoundingClientRect();
+  _dragClone = sourceEl.cloneNode(true);
+  _dragClone.style.cssText = `
+    position:fixed;
+    width:${rect.width}px;
+    height:${rect.height}px;
+    top:${rect.top}px;
+    left:${rect.left}px;
+    pointer-events:none;
+    z-index:9999;
+    opacity:0.92;
+    transform:scale(1.1) rotate(3deg);
+    box-shadow:0 12px 30px rgba(0,0,0,0.6);
+    transition:none;
+    border-radius:8px;
+  `;
+  document.body.appendChild(_dragClone);
+  sourceEl.classList.add('dragging');
+  // guardar offset del toque dentro de la carta
+  _dragClone._ox = x - rect.left;
+  _dragClone._oy = y - rect.top;
+}
+
+function moveDragClone(x, y) {
+  if (!_dragClone) return;
+  _dragClone.style.left = (x - _dragClone._ox) + 'px';
+  _dragClone.style.top  = (y - _dragClone._oy) + 'px';
+}
+
+function removeDragClone() {
+  if (_dragClone) { _dragClone.remove(); _dragClone = null; }
+  const grid = document.getElementById('hand-grid');
+  if (grid) grid.querySelectorAll('.hand-card.dragging').forEach(el => el.classList.remove('dragging'));
+}
+
+/* ── INDICADOR DE POSICIÓN ── */
+function updateDragOverIndicator(x, y) {
+  removeDragOverIndicators();
+  const grid = document.getElementById('hand-grid');
+  if (!grid) return;
+  const cards = [...grid.querySelectorAll('.hand-card:not(.dragging)')];
+  // Encontrar la carta más cercana por centro X
+  let closest = null, closestDist = Infinity;
+  cards.forEach(el => {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const dist = Math.abs(cx - x);
+    if (dist < closestDist) { closestDist = dist; closest = el; }
+  });
+  if (closest) closest.classList.add('drag-over');
+}
+
+function removeDragOverIndicators() {
+  const grid = document.getElementById('hand-grid');
+  if (grid) grid.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+
+/* ── REORDENAR ── */
+function finishDrag(x, y) {
+  const grid = document.getElementById('hand-grid');
+  if (!grid || _dragSrcIdx === null) return;
+  const cards = [...grid.querySelectorAll('.hand-card:not(.dragging)')];
+
+  // Encontrar destino: carta más cercana por X
+  let closest = null, closestDist = Infinity, closestDataIdx = null;
+  cards.forEach(el => {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const dist = Math.abs(cx - x);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = el;
+      closestDataIdx = parseInt(el.dataset.idx, 10);
+    }
+  });
+
+  if (closest === null || closestDataIdx === _dragSrcIdx) return;
+
+  // Reordenar el array de la mano
+  const hand = playerHands[currentTurnPlayerIdx];
+  const [moved] = hand.splice(_dragSrcIdx, 1);
+  let targetIdx = closestDataIdx;
+  // Ajuste: si arrastramos desde antes del destino, el índice real bajó
+  if (_dragSrcIdx < targetIdx) targetIdx--;
+  hand.splice(targetIdx, 0, moved);
+
+  // Ajustar selectedDiscardIdx si corresponde
+  if (selectedDiscardIdx === _dragSrcIdx) {
+    selectedDiscardIdx = targetIdx;
+  } else if (_dragSrcIdx < selectedDiscardIdx && targetIdx >= selectedDiscardIdx) {
+    selectedDiscardIdx--;
+  } else if (_dragSrcIdx > selectedDiscardIdx && targetIdx <= selectedDiscardIdx) {
+    selectedDiscardIdx++;
+  }
+
+  renderHandGrid();
+  updateActionButtons();
+}
+
+function getPaloRGB(suit) {
+  const map = {'basto':'63,202,160','espada':'79,163,232','oro':'245,184,74','copa':'224,111,160'};
+  return map[suit] || '255,255,255';
+}
+
+// ============================================================
+// UTILIDADES DE PUNTAJE
+// ============================================================
+function total(i) {
+  return scores[i].reduce((a,b)=>a+b,0);
+}
+
+function saveState() {
+  localStorage.setItem('conga_scores', JSON.stringify(scores));
+  localStorage.setItem('conga_history', JSON.stringify(history));
+  localStorage.setItem('conga_mods_hist', JSON.stringify(roundModifiersHistory));
+  localStorage.setItem('conga_players', JSON.stringify(players));
+  localStorage.setItem('conga_use_dice', JSON.stringify(useDiceMode));
+  localStorage.setItem('conga_interactive', JSON.stringify(useInteractiveMode));
+}
+
+function loadState() {
+  const localScores = localStorage.getItem('conga_scores');
+  const localPlayers = localStorage.getItem('conga_players');
+  if (localScores && localPlayers) {
+    scores = JSON.parse(localScores);
+    history = JSON.parse(localStorage.getItem('conga_history') || '[]');
+    roundModifiersHistory = JSON.parse(localStorage.getItem('conga_mods_hist') || '[]');
+    players = JSON.parse(localPlayers);
+    useDiceMode = JSON.parse(localStorage.getItem('conga_use_dice') !== null ? localStorage.getItem('conga_use_dice') : 'true');
+    useInteractiveMode = JSON.parse(localStorage.getItem('conga_interactive') !== null ? localStorage.getItem('conga_interactive') : 'true');
+
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('main-game-layout').style.display = 'block';
+    document.getElementById('play-area').style.display = 'none';
+    document.getElementById('scores-panel').style.display = 'block';
+
+    applyModeUI();
+    render();
+    return true;
+  }
+  return false;
+}
+
+function applyModeUI() {
+  if (useDiceMode) {
+    document.getElementById('game-subtitle').textContent = "🃏 Local Pocket Edition v1.0 — Juego Interactivo Pass & Play";
+    document.getElementById('main-dice-btn').style.display = 'inline-block';
+  } else {
+    document.getElementById('game-subtitle').textContent = "🃏 Local Pocket Edition v1.0 — Clásico";
+    document.getElementById('main-dice-btn').style.display = 'none';
+  }
+}
+
+// ============================================================
+// SETUP
+// ============================================================
+function goToPlayerSelection() {
+  document.getElementById('welcome-screen').style.display = 'none';
+  const container = document.getElementById('setup-players-list');
+  container.innerHTML = players.map((p,i) => `
+    <div class="setup-row">
+      <div class="setup-info">
+        <input type="text" id="pname-${i}" value="${p.name}" style="background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.2);color:#fff;font-size:16px;font-weight:600;font-family:'DM Sans',sans-serif;width:100px;outline:none" onchange="players[${i}].name=this.value">
+        <span style="font-size:22px" id="pinit-${i}">${p.init}</span>
+      </div>
+      <label class="switch"><input type="checkbox" id="chk-p-${i}" ${p.activePlayer ? 'checked' : ''} onchange="updatePlayerCheck(${i})"><span class="slider"></span></label>
+    </div>
+  `).join('');
+  document.getElementById('player-select-screen').style.display = 'block';
+}
+
+function updatePlayerCheck(i) {
+  players[i].activePlayer = document.getElementById(`chk-p-${i}`).checked;
+}
+
+function confirmInitialSetup() {
+  const activeCount = players.filter(p=>p.activePlayer).length;
+  if (activeCount < 2) { toast('⚠️ Error: Deben jugar al menos 2 personas.'); return; }
+
+  useDiceMode = document.getElementById('chk-dice-mode').checked;
+  useInteractiveMode = document.getElementById('chk-interactive').checked;
+  document.getElementById('player-select-screen').style.display = 'none';
+
+  saveState();
+
+  if (useDiceMode) {
+    applyModeUI();
+    openDiceModal();
+  } else {
+    applyModeUI();
+    document.getElementById('main-game-layout').style.display = 'block';
+    startRound();
+  }
+}
+
+function getNextRoundStartPlayer() {
+  const activeLive = players.map((_,i) => i).filter(i => players[i].activePlayer && total(i) < LIMIT);
+  if (activeLive.length === 0) return 0;
+
+  // Primera ronda: elegir al azar entre jugadores activos
+  if (lastRoundStartPlayerIdx === -1) {
+    const randIdx = Math.floor(Math.random() * activeLive.length);
+    return activeLive[randIdx];
+  }
+
+  // Rondas siguientes: rotar al siguiente jugador activo después del anterior
+  let candidateIdx = lastRoundStartPlayerIdx;
+  for (let attempts = 0; attempts < 4; attempts++) {
+    candidateIdx = (candidateIdx + 1) % 4;
+    if (activeLive.includes(candidateIdx)) return candidateIdx;
+  }
+  return activeLive[0];
+}
+
+function startRound() {
+  roundRunning = true;
+  roundCutterPlayerIdx = null;
+
+  // Determinar primer jugador: aleatorio en ronda 1, rotativo luego
+  const firstPlayerIdx = getNextRoundStartPlayer();
+  lastRoundStartPlayerIdx = firstPlayerIdx;
+  currentTurnPlayerIdx = firstPlayerIdx;
+
+  if (useInteractiveMode) {
+    document.getElementById('play-area').style.display = 'block';
+    document.getElementById('scores-panel').style.display = 'none';
+    startInteractiveRound(firstPlayerIdx);
+  } else {
+    startClassicRound();
+  }
+}
+
+function startClassicRound() {
+  roundRunning = true;
+  roundCutterPlayerIdx = null;
+  document.getElementById('play-area').style.display = 'none';
+  document.getElementById('scores-panel').style.display = 'block';
+  render();
+}
+
+// ============================================================
+// RENDER DEL PANEL DE PUNTAJES
+// ============================================================
+function render() {
+  const tots = players.map((_, i) => total(i));
+  const maxCompletedRounds = Math.min(...scores.map((s,idx) => players[idx].activePlayer ? s.length : 999));
+  const alive = players.map((p,i) => {
+    if (!p.activePlayer) return false;
+    let sumAtLastRound = scores[i].slice(0, maxCompletedRounds).reduce((a,b)=>a+b, 0);
+    return sumAtLastRound < LIMIT;
+  });
+
+  const aliveTots = tots.filter((_,i) => alive[i]);
+  const minAlive = aliveTots.length ? Math.min(...aliveTots) : null;
+  const maxTot = Math.max(...tots);
+
+  document.getElementById('grid').innerHTML = players.map((p,i) => {
+    if (!p.activePlayer) return '';
+    const t = tots[i];
+    const dead = !alive[i];
+    const pct = Math.min(100, Math.round(t/LIMIT*100));
+    const rem = Math.max(0, LIMIT-t);
+    const isLeading = alive[i]&&t===minAlive&&scores[i].length>0&&aliveTots.filter(v=>v===minAlive).length===1;
+    const isDanger = !dead&&t>=(useDiceMode?75:80);
+    const isWorse = !dead&&t===maxTot&&scores[i].length>0&&tots.filter((v,j)=>alive[j]&&v===maxTot).length===1;
+    const isCurrentTurn = interactiveRoundActive && i === currentTurnPlayerIdx;
+
+    let badge = '';
+    if (dead) badge = `<span class="status-badge badge-dead">💀 Eliminado</span>`;
+    else if (isCurrentTurn) badge = `<span class="status-badge badge-turn">🎴 Su turno</span>`;
+    else if (isLeading) badge = `<span class="status-badge badge-win">🏆 Ganando</span>`;
+    else if (isDanger&&isWorse) badge = `<span class="status-badge badge-warn">🔥 ¡Peligro!</span>`;
+    else if (isDanger) badge = `<span class="status-badge badge-warn">⚠️ Cuidado</span>`;
+    else if (isWorse&&scores[i].length>0) badge = `<span class="status-badge badge-lose">😬 Perdiendo</span>`;
+
+    let dicePanel = '';
+    if (!dead && !gameOver && useDiceMode) {
+      const rState = currentRoundDice[i];
+      if (rState && rState.rolled) {
+        dicePanel = `<div class="dice-status"><div class="good">${rState.good.text}</div><div class="bad">${rState.bad.text}</div></div>`;
+      } else {
+        dicePanel = `<div class="dice-status"><div class="safe">🔵 Modo Seguro (-10 pts al final)</div></div>`;
+      }
+    }
+
+    const currentGlobalRoundIndex = Math.max(...scores.map((s,idx) => players[idx].activePlayer ? s.length : 0));
+    const yaCargoRonda = scores[i].length === currentGlobalRoundIndex && currentGlobalRoundIndex > 0;
+    const corteBtnActive = (roundRunning && !dead && !useInteractiveMode) ? ' active' : '';
+    const addBtnActive = (!roundRunning && !dead && !yaCargoRonda && !useInteractiveMode) ? ' active' : '';
+
+    const chips = scores[i].map((s,ri) => {
+      const modDesc = roundModifiersHistory[ri] && roundModifiersHistory[ri][i] ? roundModifiersHistory[ri][i] : 'Puntos calculados';
+      return `<div class="round-chip"><div class="rc-top"><span class="rnum">R${ri+1}</span><span style="font-weight:bold;color:${s<0?'#7ddd3a':'#fff'}">${s>=0?'+':''}${s} pts</span></div><div class="rc-mods">${modDesc}</div><button class="del-btn" onclick="delRound(${i},${ri})">✕</button></div>`;
+    }).join('');
+
+    return `<div class="col p${i}${dead?' eliminated':''}">
+      <div class="card${isDanger&&!dead?' danger':''}${dead?' eliminated':''}">
+        <div class="avatar">${p.init}</div>
+        <div class="pname">${p.name}</div>
+        <div class="pscore">${t}</div>
+        <div class="plabel">de ${LIMIT} puntos</div>
+        <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
+        <div class="bar-info"><span class="bar-pct">${pct}%</span><span class="bar-rem">${rem} restantes</span></div>
+        ${badge}
+        ${dicePanel}
+      </div>
+      <button class="corte-btn${corteBtnActive}" onclick="jugadorCortaLaRonda(${i})"><span>💥 CORTAR AQUÍ</span></button>
+      <button class="add-btn${addBtnActive}" onclick="openModal(${i})"><span class="plus-icon">➕</span><span class="add-label">Ingresar cartas colgadas</span></button>
+      <div class="rounds">${chips}</div>
+    </div>`;
+  }).join('');
+
+  const activeCount = players.filter(p=>p.activePlayer).length;
+  document.getElementById('grid').style.gridTemplateColumns = `repeat(${activeCount},minmax(0,1fr))`;
+  renderGlobalHistoryTable();
+}
+
+function renderGlobalHistoryTable() {
+  const activePlayers = players.filter(p=>p.activePlayer);
+  const maxRounds = Math.max(...scores.map((s,idx) => players[idx].activePlayer ? s.length : 0));
+  const section = document.getElementById('global-history-section');
+  if (maxRounds === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  let html = `<thead><tr><th>Ronda</th>`;
+  activePlayers.forEach(p => { html += `<th>${p.init} ${p.name}</th>`; });
+  html += `</tr></thead><tbody>`;
+  let acumulados = players.map(() => 0);
+  for (let r = 0; r < maxRounds; r++) {
+    html += `<tr><td><b>R${r+1}</b></td>`;
+    players.forEach((p,idx) => {
+      if (!p.activePlayer) return;
+      let val = scores[idx][r];
+      if (val !== undefined) {
+        acumulados[idx] += val;
+        html += `<td>${val>=0?'+':''}${val} <span style="color:rgba(255,255,255,0.4);font-size:11px;">(${acumulados[idx]})</span></td>`;
+      } else { html += `<td>-</td>`; }
+    });
+    html += `</tr>`;
+  }
+  html += `<tr style="background:rgba(245,184,74,0.1);font-weight:bold;color:#f5b84a;"><td>TOTAL</td>`;
+  players.forEach((p,idx) => { if (!p.activePlayer) return; html += `<td>${total(idx)} pts</td>`; });
+  html += `</tr></tbody>`;
+  document.getElementById('history-table-element').innerHTML = html;
+}
+
+// ============================================================
+// DADOS
+// ============================================================
+function openDiceModal() {
+  if (gameOver || roundRunning) return;
+  let html = '';
+  let jugadoresVivos = 0;
+  players.forEach((p,i) => {
+    if (!p.activePlayer || total(i) >= LIMIT) return;
+    jugadoresVivos++;
+    currentRoundDice[i] = {rolled:false,good:null,bad:null,safe:true};
+    html += `
+      <div class="dice-row p${i}" id="dice-row-${i}">
+        <div class="dice-pinfo"><span>${p.init}</span> <span>${p.name}</span></div>
+        <div class="dice-actions">
+          <button type="button" class="dice-btn active-safe" id="btn-safe-${i}" onclick="setPlayerSafe(${i})">🛡️ Ir Seguro</button>
+          <button type="button" class="dice-btn" style="background:#4a1a0a;border-color:#a84f1a;color:#f4b5d4" id="btn-roll-${i}" onclick="rollDiceWithShake(${i})">🎲 Tirar Dados</button>
+          <div class="dice-result-box" id="dice-res-${i}">Seguro: Se restarán 10 pts al final de la ronda.</div>
+        </div>
+      </div>`;
+  });
+  if (jugadoresVivos <= 1) { checkWinFinalized(); return; }
+  document.getElementById('dice-grid-content').innerHTML = html;
+  document.getElementById('dice-overlay').classList.add('open');
+}
+
+function setPlayerSafe(i) {
+  currentRoundDice[i] = {rolled:false,good:null,bad:null,safe:true};
+  document.getElementById(`btn-safe-${i}`).classList.add('active-safe');
+  document.getElementById(`btn-roll-${i}`).classList.remove('active-safe');
+  document.getElementById(`dice-res-${i}`).innerHTML = "Seguro: Se restarán 10 pts al final de la ronda.";
+}
+
+function rollDiceWithShake(i) {
+  const row = document.getElementById(`dice-row-${i}`);
+  const resBox = document.getElementById(`dice-res-${i}`);
+  row.classList.add('shaking');
+  resBox.innerHTML = "🎲 Agitando los dados en la mesa...";
+  setTimeout(() => {
+    row.classList.remove('shaking');
+    const gIndex = Math.floor(Math.random() * G_DICE.length);
+    const bIndex = Math.floor(Math.random() * B_DICE.length);
+    currentRoundDice[i] = {rolled:true, good:G_DICE[gIndex], bad:B_DICE[bIndex], safe:false};
+    document.getElementById(`btn-safe-${i}`).classList.remove('active-safe');
+    document.getElementById(`btn-roll-${i}`).classList.add('active-safe');
+    resBox.innerHTML = `<span style="color:#7ddd3a">${G_DICE[gIndex].text}</span><br><span style="color:#ff7070">${B_DICE[bIndex].text}</span>`;
+  }, 600);
+}
+
+function confirmDiceRonda() {
+  document.getElementById('dice-overlay').classList.remove('open');
+  document.getElementById('main-game-layout').style.display = 'block';
+
+  roundRunning = true;
+  roundCutterPlayerIdx = null;
+  timeElapsed = 0;
+  window._tempRoundMods = {};
+
+  if (!useInteractiveMode) {
+    document.getElementById('timer-clock').textContent = "00:00";
+    document.getElementById('timer-banner').style.display = 'inline-block';
+    document.getElementById('timer-banner').classList.add('active');
+  }
+  document.getElementById('main-dice-btn').disabled = true;
+
+  clearInterval(timerInterval);
+  if (!useInteractiveMode) {
+    timerInterval = setInterval(() => {
+      timeElapsed++;
+      let min = Math.floor(timeElapsed/60).toString().padStart(2,'0');
+      let sec = (timeElapsed%60).toString().padStart(2,'0');
+      document.getElementById('timer-clock').textContent = `${min}:${sec}`;
+    }, 1000);
+    render();
+    toast('⚔️ ¡Ronda armada! El tiempo corre en vivo.');
+  } else {
+    startRound();
+    toast('🃏 ¡Dados listos! Repartiendo cartas...');
+  }
+}
+
+// ============================================================
+// LÓGICA CLÁSICA (sin modo interactivo)
+// ============================================================
+function jugadorCortaLaRonda(idx) {
+  if (!roundRunning || useInteractiveMode) return;
+  roundRunning = false;
+  roundCutterPlayerIdx = idx;
+  if (useDiceMode) {
+    clearInterval(timerInterval);
+    document.getElementById('timer-banner').classList.remove('active');
+    let min = Math.floor(timeElapsed/60).toString().padStart(2,'0');
+    let sec = (timeElapsed%60).toString().padStart(2,'0');
+    document.getElementById('timer-banner').innerHTML = `🛑 CORTÓ: ${players[idx].name} (${min}:${sec})`;
+  } else {
+    if (!window._tempRoundMods) window._tempRoundMods = {};
+    window._tempRoundMods[idx] = "💥 Cortó (0 pts)";
+    scores[idx].push(0);
+  }
+  saveState();
+  render();
+  toast(`💥 ¡${players[idx].name} metió el corte! Ingresen los puntos.`);
+  if (!useDiceMode) checkAndFinalizeRoundData();
+}
+
+function openModal(idx) {
+  if (useInteractiveMode) return;
+  const maxCompletedRounds = Math.min(...scores.map((s,idx) => players[idx].activePlayer ? s.length : 999));
+  if ((scores[idx].reduce((a,b)=>a+b,0) >= LIMIT) || gameOver || (roundRunning && useDiceMode)) return;
+  const currentRoundIndex = scores[0].length;
+  if (!useDiceMode && scores[idx].length > currentRoundIndex) return;
+
+  active = idx;
+  selectedHandCards = [];
+  const p = players[idx];
+  const t = total(idx);
+
+  let matrixHtml = '';
+  Object.keys(PALOS).forEach(suitKey => {
+    let suit = PALOS[suitKey];
+    let columnButtons = '';
+    for (let num=1; num<=12; num++) {
+      columnButtons += `<button class="card-token" onclick="addCardToHand(${num},'${suitKey}')">${num}</button>`;
+    }
+    matrixHtml += `<div class="suit-col"><div class="suit-header" title="${suit.name}">${suit.emoji}</div>${columnButtons}</div>`;
+  });
+
+  const esElQueCorto = idx === roundCutterPlayerIdx;
+  const rolHtml = useDiceMode ? `| Rol: <b>${esElQueCorto ? '💥 CORTADOR' : '🐌 Remolque'}</b>` : '';
+
+  document.getElementById('modal-inner').className = `modal p${idx}`;
+  document.getElementById('modal-inner').innerHTML = `
+    <h3>${p.init} Mano Suelta — ${p.name}</h3>
+    <div class="msub" style="margin-bottom:6px;">Puntaje actual: ${t} pts ${rolHtml}</div>
+    <div class="grid-selector">${matrixHtml}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <label style="font-size:12px;font-weight:bold;color:#fff;">Cartas en Mano:</label>
+      <button id="btn-auto-combine" style="padding:4px 10px;border-radius:6px;background:#074a30;border:1px solid #3fcaa0;color:#9fe1cb;font-size:11px;font-weight:bold;cursor:pointer;" onclick="runAutoCombine()">⚡ Auto-Combinar</button>
+    </div>
+    <div class="selected-cards-area" id="selected-chips-container"><span style="color:rgba(255,255,255,0.3);font-size:12px;">Ninguna (0 puntos en mano)</span></div>
+    <div class="hand-analysis-box"><strong>🔍 Análisis de la Mano:</strong><div id="live-analysis-output">Mano vacía.</div></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
+      <button style="padding:8px 14px;border-radius:8px;background:#444;color:#fff;border:none;cursor:pointer;" onclick="closeModal()">Cancelar</button>
+      <button style="padding:8px 14px;border-radius:8px;background:#1a5fa8;color:#fff;border:none;font-weight:bold;cursor:pointer;" onclick="doConfirm()">✅ Confirmar</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function addCardToHand(num, suitKey) {
+  if (selectedHandCards.length >= 7) { toast('⚠️ Máximo 7 cartas colgadas.'); return; }
+  selectedHandCards.push({num, suit:suitKey});
+  updateSelectedCardsUI();
+  analyzeHandLive();
+}
+
+function removeCardFromHand(index) {
+  selectedHandCards.splice(index, 1);
+  updateSelectedCardsUI();
+  analyzeHandLive();
+}
+
+function updateSelectedCardsUI() {
+  const container = document.getElementById('selected-chips-container');
+  if (selectedHandCards.length === 0) {
+    container.innerHTML = `<span style="color:rgba(255,255,255,0.3);font-size:12px;">Ninguna (0 puntos en mano)</span>`;
+    return;
+  }
+  container.innerHTML = selectedHandCards.map((c,idx) => `
+    <div class="selected-chip">${PALOS[c.suit].emoji} ${c.num} <span onclick="removeCardFromHand(${idx})">✕</span></div>
+  `).join('');
+}
+
+function runAutoCombine() {
+  if (selectedHandCards.length < 3) { toast("💡 Se necesitan al menos 3 cartas."); return; }
+  let matchedIndices = new Set();
+  let numGroups = {};
+  selectedHandCards.forEach((c,idx) => { if (!numGroups[c.num]) numGroups[c.num]=[]; numGroups[c.num].push(idx); });
+  Object.keys(numGroups).forEach(num => { if (numGroups[num].length >= 3) numGroups[num].forEach(idx => matchedIndices.add(idx)); });
+  let suitGroups = {basto:[],espada:[],oro:[],copa:[]};
+  selectedHandCards.forEach((c,idx) => { suitGroups[c.suit].push({num:c.num,idx}); });
+  Object.keys(suitGroups).forEach(suit => {
+    let cards = suitGroups[suit].sort((a,b)=>a.num-b.num);
+    let currentRun = [];
+    for (let i = 0; i < cards.length; i++) {
+      if (currentRun.length===0) { currentRun.push(cards[i]); }
+      else if (cards[i].num === currentRun[currentRun.length-1].num+1) { currentRun.push(cards[i]); }
+      else if (cards[i].num !== currentRun[currentRun.length-1].num) {
+        if (currentRun.length >= 3) currentRun.forEach(c=>matchedIndices.add(c.idx));
+        currentRun = [cards[i]];
+      }
+    }
+    if (currentRun.length >= 3) currentRun.forEach(c=>matchedIndices.add(c.idx));
+  });
+  if (matchedIndices.size === 0) { toast("❌ No se encontraron combos."); return; }
+  let nuevasCartas = selectedHandCards.filter((_,idx)=>!matchedIndices.has(idx));
+  let totalEliminadas = selectedHandCards.length - nuevasCartas.length;
+  selectedHandCards = nuevasCartas;
+  updateSelectedCardsUI();
+  analyzeHandLive();
+  toast(`⚡ ¡Combinación exitosa! Se guardaron ${totalEliminadas} cartas.`);
+}
+
+function analyzeHandLive() {
+  const output = document.getElementById('live-analysis-output');
+  if (!output) return;
+  if (selectedHandCards.length === 0) { output.innerHTML = "Mano vacía / Todo combinado."; return; }
+  let alerts = [];
+  const rState = (active !== null) ? currentRoundDice[active] : null;
+  const isDice = useDiceMode && rState && !rState.safe;
+  let allowOddRuns = isDice && rState.good.id === 'g21';
+  let allowMixedRuns = isDice && rState.good.id === 'g22';
+  let forbidSets = isDice && rState.bad.id === 'b21';
+  let numCounts = {};
+  selectedHandCards.forEach(c => numCounts[c.num]=(numCounts[c.num]||0)+1);
+  Object.keys(numCounts).forEach(n => {
+    if (numCounts[n] >= 2) {
+      if (forbidSets) alerts.push(`🔴 Pierna bloqueada por Desorden Total: [${n}s] suman individualmente.`);
+      else alerts.push(`🔹 Pierna colgada: par/trío de [${n}s] (${numCounts[n]} cartas)`);
+    }
+  });
+  let bruteSum = selectedHandCards.reduce((a,b)=>a+b.num, 0);
+  if (alerts.length === 0) output.innerHTML = `✅ Cartas independientes. Suma bruta: <b>+${bruteSum} pts</b>.`;
+  else output.innerHTML = `<ul style="padding-left:14px;">${alerts.map(a=>`<li>${a}</li>`).join('')}</ul><div style="margin-top:4px;font-weight:bold;">Suma bruta: +${bruteSum} pts.</div>`;
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('overlay')) {
+    document.getElementById('overlay').classList.remove('open');
+    active = null;
+  }
+}
+
+function doConfirm() {
+  const pts = computeFinalPoints(active, selectedHandCards);
+  history.push(JSON.parse(JSON.stringify(scores)));
+  if (!window._tempRoundMods) window._tempRoundMods = {};
+  window._tempRoundMods[active] = pts.modStrings.join(' | ');
+  scores[active].push(pts.finalPts);
+  document.getElementById('overlay').classList.remove('open');
+  toast(`Registrado para ${players[active].name}`);
+  active = null;
+  checkAndFinalizeRoundData();
+  saveState();
+  render();
+}
+
+function checkWinFinalized() {
+  const tots = players.map((_,i) => total(i));
+  const activeAndAliveIdxs = players.map((_,i)=>i).filter(i => tots[i] < LIMIT && players[i].activePlayer);
+  if (activeAndAliveIdxs.length === 1 && !gameOver) {
+    gameOver = true;
+    clearInterval(timerInterval);
+    document.getElementById('timer-banner').style.display = 'none';
+    const w = activeAndAliveIdxs[0];
+    document.getElementById('win-name').textContent = `🎉 ¡${players[w].name} ganó la partida!`;
+    document.getElementById('win-sub').textContent = `Sobrevivió finalizando con ${tots[w]} puntos totales.`;
+    document.getElementById('win-screen').classList.add('show');
+    localStorage.clear();
+  }
+}
+
+function checkAndFinalizeRoundData() {
+  const maxCompletedRoundsBefore = Math.min(...scores.map((s,idx) => players[idx].activePlayer ? s.length : 999));
+  const alivePlayersCount = players.filter((p,i) => {
+    if (!p.activePlayer) return false;
+    return scores[i].slice(0, maxCompletedRoundsBefore).reduce((a,b)=>a+b, 0) < LIMIT;
+  }).length;
+
+  const currentRoundIndex = Math.max(...scores.map((s,i) => players[i].activePlayer ? s.length : 0)) - 1;
+  let pCargados = 0;
+  players.forEach((p,i) => {
+    if (!p.activePlayer) return;
+    if (scores[i].length === currentRoundIndex + 1) pCargados++;
+  });
+
+  if (pCargados >= alivePlayersCount) {
+    players.forEach((p,i) => {
+      if (!p.activePlayer) return;
+      const rState = currentRoundDice[i];
+      if (!useDiceMode || !rState || rState.safe) return;
+
+      if (rState.good.id === 'g5' && scores[i][currentRoundIndex] === 0) {
+        players.forEach((pSub,j) => {
+          if (pSub.activePlayer && j !== i && scores[j][currentRoundIndex] !== undefined) {
+            scores[j][currentRoundIndex] += 15;
+          }
+        });
+      }
+      if (rState.good.id === 'g28' && roundCutterPlayerIdx !== null && roundCutterPlayerIdx !== i) {
+        scores[roundCutterPlayerIdx][currentRoundIndex] += 10;
+        scores[i][currentRoundIndex] -= 10;
+      }
+      if (rState.bad.id === 'b28') {
+        let vecinoIzquierdoIdx = (i === 0) ? 3 : i - 1;
+        while (!players[vecinoIzquierdoIdx].activePlayer) {
+          vecinoIzquierdoIdx = (vecinoIzquierdoIdx === 0) ? 3 : vecinoIzquierdoIdx - 1;
+        }
+        scores[i][currentRoundIndex] += (scores[vecinoIzquierdoIdx][currentRoundIndex] || 0);
+      }
+      if (rState.bad.id === 'b27') {
+        let totalAcum = scores[i].reduce((a,b)=>a+b, 0);
+        if (totalAcum >= 80) {
+          scores[i][currentRoundIndex] += (LIMIT - totalAcum);
+        }
+      }
+    });
+
+    roundModifiersHistory.push(window._tempRoundMods || {});
+    window._tempRoundMods = {};
+
+    if (useDiceMode) {
+      document.getElementById('main-dice-btn').disabled = false;
+      document.getElementById('timer-banner').style.display = 'none';
+      roundCutterPlayerIdx = null;
+      roundRunning = false;
+      currentRoundDice = [
+        {rolled:false,good:null,bad:null,safe:true},
+        {rolled:false,good:null,bad:null,safe:true},
+        {rolled:false,good:null,bad:null,safe:true},
+        {rolled:false,good:null,bad:null,safe:true}
+      ];
+      checkWinFinalized();
+    } else {
+      roundRunning = false;
+      startClassicRound();
+    }
+    saveState();
+  }
+}
+
+function delRound(pi, ri) {
+  history.push(JSON.parse(JSON.stringify(scores)));
+  scores.forEach(s => { if (s[ri] !== undefined) s.splice(ri, 1); });
+  if (roundModifiersHistory[ri]) roundModifiersHistory.splice(ri, 1);
+  gameOver = false;
+  window._tempRoundMods = {};
+  clearInterval(timerInterval);
+  document.getElementById('timer-banner').style.display = 'none';
+  document.getElementById('win-screen').classList.remove('show');
+  if (useDiceMode) {
+    roundCutterPlayerIdx = null;
+    roundRunning = false;
+    document.getElementById('main-dice-btn').disabled = false;
+  } else {
+    startClassicRound();
+  }
+  saveState();
+  render();
+}
+
+function undoLast() {
+  if (!history.length) { toast('❌ Nada para deshacer'); return; }
+  scores = history.pop();
+  if (roundModifiersHistory.length > scores[0].length) roundModifiersHistory.pop();
+  gameOver = false;
+  window._tempRoundMods = {};
+  clearInterval(timerInterval);
+  document.getElementById('timer-banner').style.display = 'none';
+  document.getElementById('win-screen').classList.remove('show');
+  interactiveRoundActive = false;
+  document.getElementById('play-area').style.display = 'none';
+  document.getElementById('scores-panel').style.display = 'block';
+  document.getElementById('passplay-curtain').classList.remove('show');
+  document.getElementById('cut-reveal-screen').classList.remove('show');
+  if (useDiceMode) {
+    roundCutterPlayerIdx = null;
+    roundRunning = false;
+    document.getElementById('main-dice-btn').disabled = false;
+  } else {
+    startClassicRound();
+  }
+  saveState();
+  render();
+}
+
+function resetToWelcome() {
+  if (confirm("¿Seguro que querés reiniciar? Se borrará la partida actual.")) {
+    clearInterval(timerInterval);
+    scores = [[],[],[],[]];
+    history = [];
+    roundModifiersHistory = [];
+    window._tempRoundMods = {};
+    gameOver = false;
+    roundCutterPlayerIdx = null;
+    roundRunning = false;
+    interactiveRoundActive = false;
+    isFirstTurnOfRound = false;
+    roundStartPlayerIdx = -1;
+    lastRoundStartPlayerIdx = -1;
+    gameDeck = [];
+    gamePile = [];
+    playerHands = [[],[],[],[]];
+    localStorage.clear();
+    document.getElementById('main-game-layout').style.display = 'none';
+    document.getElementById('win-screen').classList.remove('show');
+    document.getElementById('player-select-screen').style.display = 'none';
+    document.getElementById('play-area').style.display = 'none';
+    document.getElementById('scores-panel').style.display = 'block';
+    document.getElementById('passplay-curtain').classList.remove('show');
+    document.getElementById('cut-reveal-screen').classList.remove('show');
+    document.getElementById('welcome-screen').style.display = 'block';
+  }
+}
+
+let _tt;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+window.onload = function() {
+  loadState();
+};
+</script>
+</body>
+</html>
