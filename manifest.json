@@ -1,8 +1,10 @@
 {
+  "id": "/Conga-Uruguaya-AI-Game/",
+  "scope": "/Conga-Uruguaya-AI-Game/",
+  "start_url": "/Conga-Uruguaya-AI-Game/index.html",
   "short_name": "Conga",
   "name": "Conga Uruguaya",
   "description": "Juego tradicional de la Conga Uruguaya - Local Pocket Edition",
-  "start_url": "/Conga-Uruguaya-AI-Game/",
   "background_color": "#1a0533",
   "theme_color": "#0d1f4a",
   "display": "fullscreen",
