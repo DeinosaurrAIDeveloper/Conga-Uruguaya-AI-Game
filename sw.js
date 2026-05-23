@@ -1,10 +1,10 @@
-const CACHE_NAME = 'conga-v14-cache';
+const CACHE_NAME = 'conga-v16-cache';
 const ASSETS = [
-  '/conga-uruguaya/',
-  '/conga-uruguaya/index.html',
-  '/conga-uruguaya/manifest.json',
-  '/conga-uruguaya/icon-192.png',
-  '/conga-uruguaya/icon-512.png'
+  '/Conga-Uruguaya-AI-Game/',
+  '/Conga-Uruguaya-AI-Game/index.html',
+  '/Conga-Uruguaya-AI-Game/manifest.json',
+  '/Conga-Uruguaya-AI-Game/icon-192.png',
+  '/Conga-Uruguaya-AI-Game/icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
@@ -34,7 +34,7 @@ self.addEventListener('fetch', (e) => {
     caches.match(e.request).then((cachedResponse) => {
       return cachedResponse || fetch(e.request);
     }).catch(() => {
-      return caches.match('/conga-uruguaya/index.html');
+      return caches.match('/Conga-Uruguaya-AI-Game/index.html');
     })
   );
 });
