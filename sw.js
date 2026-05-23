@@ -2,7 +2,9 @@ const CACHE_NAME = 'conga-v14-cache';
 const ASSETS = [
   '/conga-uruguaya/',
   '/conga-uruguaya/index.html',
-  '/conga-uruguaya/manifest.json'
+  '/conga-uruguaya/manifest.json',
+  '/conga-uruguaya/icon-192.png',
+  '/conga-uruguaya/icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
@@ -36,4 +38,3 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
-
