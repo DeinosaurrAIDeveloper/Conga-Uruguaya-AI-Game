@@ -1,1 +1,1 @@
-# Conga-Uruguaya-AI-Game
+# JavaLingo
